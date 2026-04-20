@@ -1,8 +1,28 @@
+# Dependencies
 node_modules/
+
+# Build artifacts
 dist/
+*.tsbuildinfo
+
+# Secrets / environment
 .env
 .env.local
-*.log
+.env.*.local
+!.env.example
+
+# Tool caches
 .turbo/
-.DS_Store
+.vercel/
+
+# Coverage / logs
 coverage/
+*.log
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
