@@ -1,0 +1,26 @@
+{
+  "name": "teammem",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Persistent, permissioned knowledge base for teams and their AI tools",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:api": "turbo run test:api",
+    "lint": "turbo run lint",
+    "db:migrate": "turbo run db:migrate --filter=@teammem/api"
+  },
+  "keywords": [
+    "knowledge-base",
+    "mcp",
+    "ai",
+    "team-collaboration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.4",
+  "devDependencies": {
+    "turbo": "^2.9.6"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "teammem-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for TeamMem — connect Claude, Cursor, or any MCP-compatible AI to your team's persistent knowledge base",
+  "type": "module",
+  "bin": {
+    "teammem-mcp": "./dist/index.js",
+    "teammem-mcp-sse": "./dist/sse.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "dev:sse": "tsx watch src/sse.ts",
+    "start": "node dist/index.js",
+    "start:sse": "node dist/sse.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "ai",
+    "knowledge-base",
+    "claude",
+    "cursor",
+    "team",
+    "model-context-protocol"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
