@@ -401,6 +401,27 @@ entryRoutes.delete("/:id", async (c) => {
 
 entryRoutes.get("/:id/versions", async (c) => {
   const id = c.req.param("id");
+  const auth = c.get("auth");
+  const permissions = auth.permissions as AgentPermissions | undefined;
+
+  // Version history contains the same structured_data as the entry itself,
+  // so redaction and per-key collection access must be enforced here too —
+  // otherwise /versions is a trivial bypass around /entries/:id.
+  const entryLookup = await query<{ collection_name: string }>(
+    `SELECT c.name AS collection_name
+     FROM entries e INNER JOIN collections c ON e.collection_id = c.id
+     WHERE e.id = $1`,
+    [id]
+  );
+  if (entryLookup.rows.length === 0) {
+    return c.json({ error: "Entry not found" }, 404);
+  }
+  const collectionName = entryLookup.rows[0].collection_name;
+
+  if (permissions && !canAccessCollection(permissions, collectionName, "read")) {
+    return c.json({ error: "Access denied to this collection" }, 403);
+  }
+
   const result = await query(
     `SELECT ev.*, u.name AS changed_by_name, u.email AS changed_by_email,
             ak.name AS changed_by_agent_name
@@ -412,5 +433,16 @@ entryRoutes.get("/:id/versions", async (c) => {
     [id]
   );
 
-  return c.json({ versions: result.rows });
+  const versions = permissions
+    ? result.rows.map((v) => ({
+        ...v,
+        structured_data: filterDeniedFields(
+          permissions,
+          collectionName,
+          v.structured_data
+        ),
+      }))
+    : result.rows;
+
+  return c.json({ versions });
 });

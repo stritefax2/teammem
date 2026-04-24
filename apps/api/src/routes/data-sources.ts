@@ -8,7 +8,11 @@ import {
 } from "@teammem/shared";
 import type { AppEnv } from "../types.js";
 import { encryptConfig, decryptConfig } from "../services/connectors/crypto.js";
-import { introspect, testConnection } from "../services/connectors/postgres.js";
+import {
+  introspect,
+  testConnection,
+  ConnectorPrivilegeError,
+} from "../services/connectors/postgres.js";
 import { runSyncNow } from "../services/connectors/sync.js";
 import { logAction } from "../services/audit.js";
 
@@ -71,6 +75,17 @@ dataSourceRoutes.post("/", async (c) => {
   try {
     await testConnection(parsed.data.connection_string);
   } catch (e) {
+    if (e instanceof ConnectorPrivilegeError) {
+      return c.json(
+        {
+          error: "Connection refused: supplied role has too many privileges.",
+          code: e.code,
+          detail: e.message,
+          privileges: e.privileges,
+        },
+        400
+      );
+    }
     return c.json(
       {
         error: "Connection test failed",
@@ -154,6 +169,17 @@ dataSourceRoutes.post("/:id/introspect", async (c) => {
     const tables = await introspect(connectionString);
     return c.json({ tables });
   } catch (e) {
+    if (e instanceof ConnectorPrivilegeError) {
+      return c.json(
+        {
+          error: "Introspection refused: supplied role has too many privileges.",
+          code: e.code,
+          detail: e.message,
+          privileges: e.privileges,
+        },
+        400
+      );
+    }
     return c.json(
       {
         error: "Introspection failed",

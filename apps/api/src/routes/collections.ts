@@ -3,8 +3,13 @@ import { query } from "../db/client.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { requireWorkspaceScope } from "../middleware/workspace-scope.js";
 import { createCollectionSchema } from "@teammem/shared";
+import type { AgentPermissions } from "@teammem/shared";
 import type { AppEnv } from "../types.js";
 import { runSyncNow } from "../services/connectors/sync.js";
+import {
+  canAccessCollection,
+  filterDeniedFields,
+} from "../services/permissions.js";
 
 export const collectionRoutes = new Hono<AppEnv>();
 
@@ -35,7 +40,17 @@ collectionRoutes.get("/", async (c) => {
     [workspaceId]
   );
 
-  return c.json({ collections: result.rows });
+  // Agent keys only see collections they have at least read access to.
+  // Human workspace members see everything.
+  const auth = c.get("auth");
+  const permissions = auth.permissions as AgentPermissions | undefined;
+  const collections = permissions
+    ? result.rows.filter((c) =>
+        canAccessCollection(permissions, c.name, "read")
+      )
+    : result.rows;
+
+  return c.json({ collections });
 });
 
 collectionRoutes.post("/", async (c) => {
@@ -107,13 +122,39 @@ collectionRoutes.get("/:id", async (c) => {
     return c.json({ error: "Collection not found" }, 404);
   }
 
-  return c.json({ collection: result.rows[0] });
+  const collection = result.rows[0];
+  const auth = c.get("auth");
+  const permissions = auth.permissions as AgentPermissions | undefined;
+  if (permissions && !canAccessCollection(permissions, collection.name, "read")) {
+    return c.json({ error: "Access denied to this collection" }, 403);
+  }
+
+  return c.json({ collection });
 });
 
 collectionRoutes.get("/:id/entries", async (c) => {
   const collectionId = c.req.param("id");
   const limit = Number(c.req.query("limit")) || 50;
   const offset = Number(c.req.query("offset")) || 0;
+
+  // Per-key collection access and field redaction must be enforced here.
+  // requireWorkspaceScope only confirms workspace membership; it does not
+  // consult permissions.collection_access or permissions.field_restrictions.
+  const auth = c.get("auth");
+  const permissions = auth.permissions as AgentPermissions | undefined;
+
+  const collectionResult = await query<{ name: string }>(
+    "SELECT name FROM collections WHERE id = $1",
+    [collectionId]
+  );
+  if (collectionResult.rows.length === 0) {
+    return c.json({ error: "Collection not found" }, 404);
+  }
+  const collectionName = collectionResult.rows[0].name;
+
+  if (permissions && !canAccessCollection(permissions, collectionName, "read")) {
+    return c.json({ error: "Access denied to this collection" }, 403);
+  }
 
   const result = await query(
     `SELECT id, collection_id, workspace_id, structured_data, content,
@@ -131,8 +172,19 @@ collectionRoutes.get("/:id/entries", async (c) => {
     [collectionId]
   );
 
+  const entries = permissions
+    ? result.rows.map((row) => ({
+        ...row,
+        structured_data: filterDeniedFields(
+          permissions,
+          collectionName,
+          row.structured_data
+        ),
+      }))
+    : result.rows;
+
   return c.json({
-    entries: result.rows,
+    entries,
     total: countResult.rows[0].total,
   });
 });

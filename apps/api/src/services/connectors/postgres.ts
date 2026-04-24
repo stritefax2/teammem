@@ -28,9 +28,6 @@ async function withClient<T>(
     idleTimeoutMillis: 1000,
     connectionTimeoutMillis: 5000,
     statement_timeout: timeoutMs,
-    // Belt-and-suspenders: refuse to run as superuser on the remote side if
-    // the user accidentally paste full-access creds. This is a hint — the
-    // connector is still advisory; users should provision a read-only role.
   } as pg.PoolConfig);
   const client = await pool.connect();
   try {
@@ -38,6 +35,53 @@ async function withClient<T>(
   } finally {
     client.release();
     await pool.end();
+  }
+}
+
+export class ConnectorPrivilegeError extends Error {
+  code = "connector_privilege_too_high";
+  privileges: {
+    rolsuper: boolean;
+    rolcreaterole: boolean;
+    rolcreatedb: boolean;
+    rolbypassrls: boolean;
+  };
+  constructor(privileges: ConnectorPrivilegeError["privileges"]) {
+    super(
+      "Connector refuses high-privilege role. Provision a dedicated read-only user " +
+        "(no SUPERUSER, CREATEROLE, CREATEDB, or BYPASSRLS)."
+    );
+    this.privileges = privileges;
+  }
+}
+
+// Hard-fail if the supplied credentials are superuser or otherwise privileged
+// enough to bypass RLS / create accounts. We do this before doing any real
+// work so a paste of production admin creds can never succeed. Users must
+// provision a dedicated read-only role.
+async function assertLowPrivilegeRole(client: pg.PoolClient): Promise<void> {
+  const result = await client.query<{
+    rolsuper: boolean;
+    rolcreaterole: boolean;
+    rolcreatedb: boolean;
+    rolbypassrls: boolean;
+  }>(
+    `SELECT rolsuper, rolcreaterole, rolcreatedb, rolbypassrls
+     FROM pg_roles WHERE rolname = current_user`
+  );
+  const row = result.rows[0];
+  if (!row) {
+    // current_user not in pg_roles should not happen on a live session, but
+    // err on the safe side and reject rather than assume benign.
+    throw new ConnectorPrivilegeError({
+      rolsuper: false,
+      rolcreaterole: false,
+      rolcreatedb: false,
+      rolbypassrls: false,
+    });
+  }
+  if (row.rolsuper || row.rolcreaterole || row.rolcreatedb || row.rolbypassrls) {
+    throw new ConnectorPrivilegeError(row);
   }
 }
 
@@ -55,6 +99,7 @@ function quoteIdent(name: string): string {
 export async function testConnection(connectionString: string): Promise<void> {
   await withClient(connectionString, 5_000, async (client) => {
     await client.query("SELECT 1");
+    await assertLowPrivilegeRole(client);
   });
 }
 
@@ -65,6 +110,7 @@ export async function introspect(
     connectionString,
     INTROSPECT_STATEMENT_TIMEOUT_MS,
     async (client) => {
+      await assertLowPrivilegeRole(client);
       const tables = await client.query<{
         table_schema: string;
         table_name: string;
@@ -142,6 +188,7 @@ export async function readRows(
     connectionString,
     SYNC_STATEMENT_TIMEOUT_MS,
     async (client) => {
+      await assertLowPrivilegeRole(client);
       const cols = Array.from(new Set([config.primary_key, ...config.columns]));
       const selectList = cols.map(quoteIdent).join(", ");
       const sql = `SELECT ${selectList} FROM ${quoteQualified(config.table)} LIMIT $1`;
