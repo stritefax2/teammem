@@ -171,6 +171,88 @@ workspaceRoutes.post("/:id/invite", requireWorkspaceMember, async (c) => {
   }
 });
 
+// Seed a workspace with a fake "demo_customers" collection so evaluators
+// can try the product — create a scoped key, deny a PII-ish column, ask
+// Claude — without connecting a real database first. Deliberately native
+// (not source-backed) so there's nothing external to configure.
+const DEMO_COLLECTION_NAME = "demo_customers";
+const DEMO_ROWS = [
+  { name: "Ana Silva", email: "ana@northwind.io", company: "Northwind", plan: "enterprise", status: "at_risk", arr: 186000, ssn_fake: "123-45-6781", notes: "Flagged pricing at last QBR" },
+  { name: "Jordan Park", email: "jordan@acme.co", company: "Acme", plan: "team", status: "active", arr: 48000, ssn_fake: "123-45-6782", notes: "Upsell candidate" },
+  { name: "Sam Carter", email: "sam@contoso.com", company: "Contoso", plan: "enterprise", status: "at_risk", arr: 210000, ssn_fake: "123-45-6783", notes: "Requested tiered pricing" },
+  { name: "Priya Rao", email: "priya@initech.io", company: "Initech", plan: "team", status: "churned", arr: 0, ssn_fake: "123-45-6784", notes: "Lost to competitor Q1" },
+  { name: "Leo Moreno", email: "leo@globex.com", company: "Globex", plan: "solo", status: "active", arr: 1200, ssn_fake: "123-45-6785", notes: "Low touch" },
+  { name: "Maya Chen", email: "maya@umbrella.io", company: "Umbrella", plan: "enterprise", status: "active", arr: 320000, ssn_fake: "123-45-6786", notes: "Expansion Q3 likely" },
+  { name: "Dev Patel", email: "dev@stark.com", company: "Stark Industries", plan: "enterprise", status: "active", arr: 415000, ssn_fake: "123-45-6787", notes: "Top account" },
+  { name: "Riley Nguyen", email: "riley@oscorp.com", company: "Oscorp", plan: "team", status: "at_risk", arr: 72000, ssn_fake: "123-45-6788", notes: "Renewal flagged" },
+  { name: "Noah Weiss", email: "noah@wayne.co", company: "Wayne Enterprises", plan: "enterprise", status: "active", arr: 198000, ssn_fake: "123-45-6789", notes: "Champion changed last month" },
+  { name: "Isla Martinez", email: "isla@hooli.io", company: "Hooli", plan: "team", status: "active", arr: 60000, ssn_fake: "123-45-6790", notes: "Steady usage" },
+  { name: "Finn O'Connor", email: "finn@pied-piper.com", company: "Pied Piper", plan: "solo", status: "churned", arr: 0, ssn_fake: "123-45-6791", notes: "Moved to free tier competitor" },
+  { name: "Aya Tanaka", email: "aya@massive-dynamic.com", company: "Massive Dynamic", plan: "enterprise", status: "active", arr: 275000, ssn_fake: "123-45-6792", notes: "Strategic account, exec sponsor" },
+  { name: "Ben Ortiz", email: "ben@vandelay.com", company: "Vandelay", plan: "team", status: "at_risk", arr: 55000, ssn_fake: "123-45-6793", notes: "Support load high, watch" },
+  { name: "Zara Ahmed", email: "zara@tyrell.co", company: "Tyrell", plan: "enterprise", status: "active", arr: 240000, ssn_fake: "123-45-6794", notes: "NPS 9, reference candidate" },
+  { name: "Oliver Reed", email: "oliver@cyberdyne.ai", company: "Cyberdyne", plan: "solo", status: "active", arr: 480, ssn_fake: "123-45-6795", notes: "Prosumer, possible referrer" },
+];
+
+workspaceRoutes.post("/:id/seed-demo", requireWorkspaceMember, async (c) => {
+  const workspaceId = c.req.param("id");
+
+  const existing = await query<{ id: string }>(
+    "SELECT id FROM collections WHERE workspace_id = $1 AND name = $2",
+    [workspaceId, DEMO_COLLECTION_NAME]
+  );
+  if (existing.rows.length > 0) {
+    return c.json(
+      {
+        collection_id: existing.rows[0].id,
+        message: "Demo collection already exists",
+        already_seeded: true,
+      },
+      200
+    );
+  }
+
+  const created = await transaction(async (client) => {
+    const col = await client.query<{ id: string }>(
+      `INSERT INTO collections (workspace_id, name, collection_type)
+       VALUES ($1, $2, 'structured')
+       RETURNING id`,
+      [workspaceId, DEMO_COLLECTION_NAME]
+    );
+    const collectionId = col.rows[0].id;
+
+    const auth = c.get("auth");
+    for (const row of DEMO_ROWS) {
+      const entry = await client.query<{ id: string }>(
+        `INSERT INTO entries (collection_id, workspace_id, structured_data, created_by)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [collectionId, workspaceId, row, auth.userId || null]
+      );
+      await client.query(
+        `INSERT INTO entry_versions (entry_id, version, structured_data, changed_by, change_type)
+         VALUES ($1, 1, $2, $3, 'create')`,
+        [entry.rows[0].id, row, auth.userId || null]
+      );
+    }
+
+    return { collectionId };
+  });
+
+  return c.json(
+    {
+      collection_id: created.collectionId,
+      rows_inserted: DEMO_ROWS.length,
+      suggested_redactions: ["ssn_fake", "arr"],
+      message:
+        "Demo collection seeded. Create a scoped agent key that denies " +
+        "ssn_fake, paste the MCP config into Cursor or Claude, and ask a " +
+        "question about these customers.",
+    },
+    201
+  );
+});
+
 // Accept a pending invite (called after user registers via invite link)
 workspaceRoutes.post("/:id/accept-invite", authMiddleware, async (c) => {
   const workspaceId = c.req.param("id");

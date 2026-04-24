@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, type FormEvent } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth.js";
 import { apiFetch } from "../lib/api.js";
 import { AppShell } from "../components/AppShell.js";
@@ -25,6 +25,7 @@ interface Collection {
 export function WorkspacePage() {
   const { id } = useParams<{ id: string }>();
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [memberCount, setMemberCount] = useState(0);
@@ -32,6 +33,25 @@ export function WorkspacePage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<string>("documents");
+  const [seedingDemo, setSeedingDemo] = useState(false);
+  const [seedError, setSeedError] = useState("");
+
+  async function handleSeedDemo() {
+    if (!id) return;
+    setSeedingDemo(true);
+    setSeedError("");
+    try {
+      const data = await apiFetch<{
+        collection_id: string;
+        already_seeded?: boolean;
+      }>(`/api/v1/workspaces/${id}/seed-demo`, { method: "POST" });
+      navigate(`/w/${id}/c/${data.collection_id}`);
+    } catch (err: any) {
+      setSeedError(err.message || "Failed to seed demo data");
+    } finally {
+      setSeedingDemo(false);
+    }
+  }
 
   const loadCollections = useCallback(() => {
     if (!id) return;
@@ -210,14 +230,65 @@ export function WorkspacePage() {
         )}
 
         {collections.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-gray-500 mb-4">No collections yet.</p>
-            <button
-              onClick={() => setShowCreate(true)}
-              className="text-blue-600 font-medium text-sm hover:underline"
-            >
-              Create your first collection
-            </button>
+          <div className="py-12">
+            <div className="max-w-xl mx-auto text-center">
+              <p className="text-sm text-gray-500 mb-6">
+                No collections yet. Start with sample data, or create one
+                from scratch.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <button
+                  onClick={handleSeedDemo}
+                  disabled={seedingDemo}
+                  className="text-left bg-white rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-colors p-5 disabled:opacity-60 disabled:cursor-wait"
+                >
+                  <p className="text-sm font-semibold text-gray-900">
+                    Try with sample data
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                    Seeds a fake{" "}
+                    <code className="bg-gray-100 px-1 rounded">
+                      demo_customers
+                    </code>{" "}
+                    collection with 15 rows. Create a scoped agent key,
+                    redact <code className="bg-gray-100 px-1 rounded">ssn_fake</code>,
+                    paste the MCP config into Cursor or Claude, and ask a
+                    question. ~60 seconds end-to-end.
+                  </p>
+                  <p className="text-xs text-blue-600 mt-3 font-medium">
+                    {seedingDemo ? "Seeding…" : "Seed demo collection →"}
+                  </p>
+                </button>
+                <button
+                  onClick={() => setShowCreate(true)}
+                  className="text-left bg-white rounded-xl border border-gray-200 hover:border-gray-400 transition-colors p-5"
+                >
+                  <p className="text-sm font-semibold text-gray-900">
+                    Create an empty collection
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                    Start from a template or a blank native collection.
+                    You'll add data via upload, import, or from an agent.
+                  </p>
+                  <p className="text-xs text-blue-600 mt-3 font-medium">
+                    Pick a template →
+                  </p>
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mt-6">
+                Or connect a Postgres source from{" "}
+                <Link
+                  to={`/w/${id}/settings?tab=sources`}
+                  className="text-blue-600 hover:underline"
+                >
+                  Settings → Data Sources
+                </Link>
+                .
+              </p>
+              {seedError && (
+                <p className="text-xs text-red-600 mt-3">{seedError}</p>
+              )}
+            </div>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -9,6 +9,7 @@ MCP-compatible AI tool on your team gets scoped, audited, column-level
 redacted read access. No pasting schemas into chat. No shared prod passwords.
 
 [Product](https://github.com/stritefax2/teammem) ·
+[Data handling](./DATA_HANDLING.md) ·
 [Deploy](./DEPLOY.md) ·
 [Launch checklist](./LAUNCH.md) ·
 [Contributing](./CONTRIBUTING.md)
@@ -179,7 +180,10 @@ client.
 
 ## Security model
 
-Covered in depth in [DEPLOY.md](./DEPLOY.md#security-model-quick-reference).
+See [DATA_HANDLING.md](./DATA_HANDLING.md) for the full "what leaves
+your DB, what we store, what we log" writeup — this is the page
+security-minded reviewers read first. Deployment-level knobs are
+covered in [DEPLOY.md](./DEPLOY.md#security-model-quick-reference).
 Highlights:
 
 - Scoped agent keys (32-byte random, SHA-256 hashed, `tm_sk_` prefix).

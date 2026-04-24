@@ -61,6 +61,50 @@ type ColPerms = {
 
 type Tab = "members" | "agents" | "sources";
 
+function formatRelative(iso: string | null): string {
+  if (!iso) return "never";
+  const delta = Date.now() - new Date(iso).getTime();
+  if (delta < 60 * 1000) return "just now";
+  if (delta < 60 * 60 * 1000) {
+    const m = Math.round(delta / 60000);
+    return `${m} min${m === 1 ? "" : "s"} ago`;
+  }
+  if (delta < 24 * 60 * 60 * 1000) {
+    const h = Math.round(delta / 3600000);
+    return `${h} hour${h === 1 ? "" : "s"} ago`;
+  }
+  if (delta < 30 * 24 * 60 * 60 * 1000) {
+    const d = Math.round(delta / 86400000);
+    return `${d} day${d === 1 ? "" : "s"} ago`;
+  }
+  return new Date(iso).toLocaleDateString();
+}
+
+function summarizeScope(permissions: Record<string, unknown>): string {
+  if (permissions.collections === "*") return "Full access";
+  const cols = (permissions.collections as Record<string, unknown>) || {};
+  const collectionCount = Object.keys(cols).length;
+  const fieldRestrictions =
+    (permissions.field_restrictions as Record<
+      string,
+      { deny_fields?: string[] }
+    >) || {};
+  const redactedCount = Object.values(fieldRestrictions).reduce(
+    (n, r) => n + (r.deny_fields?.length ?? 0),
+    0
+  );
+  const parts: string[] = [];
+  parts.push(
+    `${collectionCount} collection${collectionCount === 1 ? "" : "s"}`
+  );
+  if (redactedCount > 0) {
+    parts.push(
+      `${redactedCount} redacted field${redactedCount === 1 ? "" : "s"}`
+    );
+  }
+  return parts.join(" · ");
+}
+
 export function SettingsPage() {
   const { id } = useParams<{ id: string }>();
   const { logout } = useAuth();
@@ -94,6 +138,7 @@ export function SettingsPage() {
   const [keyName, setKeyName] = useState("");
   const [keyAccess, setKeyAccess] = useState<"all" | "scoped">("all");
   const [newRawKey, setNewRawKey] = useState("");
+  const [confirmRevokeId, setConfirmRevokeId] = useState<string | null>(null);
 
   const [dataSources, setDataSources] = useState<DataSourceInfo[]>([]);
   const [showConnectSource, setShowConnectSource] = useState(false);
@@ -262,10 +307,9 @@ export function SettingsPage() {
   }
 
   async function handleDeleteKey(keyId: string) {
-    if (!confirm("Revoke this agent key? Any agents using it will lose access."))
-      return;
     await apiFetch(`/api/v1/agent-keys/${keyId}`, { method: "DELETE" });
     setAgentKeys((prev) => prev.filter((k) => k.id !== keyId));
+    setConfirmRevokeId(null);
   }
 
   return (
@@ -936,48 +980,82 @@ export function SettingsPage() {
                   </p>
                 </div>
               ) : (
-                agentKeys.map((key) => (
-                  <div
-                    key={key.id}
-                    className="flex items-center justify-between px-4 py-3 gap-3"
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {key.name}
+                agentKeys.map((key) => {
+                  const isConfirming = confirmRevokeId === key.id;
+                  const lastUsed = formatRelative(key.last_used_at);
+                  const usedRecently =
+                    key.last_used_at &&
+                    Date.now() - new Date(key.last_used_at).getTime() <
+                      10 * 60 * 1000;
+                  return (
+                    <div
+                      key={key.id}
+                      className="flex items-center justify-between px-4 py-3 gap-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {key.name}
+                          </p>
+                          {key.last_four && (
+                            <code
+                              className="text-[11px] font-mono bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded"
+                              title="Last 4 characters of this key — use to identify which tool is using it"
+                            >
+                              tm_sk_••••{key.last_four}
+                            </code>
+                          )}
+                          {usedRecently && (
+                            <span
+                              className="inline-flex items-center gap-1 text-[10px] font-medium text-green-700 bg-green-50 border border-green-100 px-1.5 py-0.5 rounded-full"
+                              title="This key was used in the last 10 minutes"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                              active
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          <span className="text-gray-700">
+                            Last used {lastUsed}
+                          </span>
+                          {" · "}
+                          Created {formatRelative(key.created_at)}
+                          {" · "}
+                          {summarizeScope(key.permissions)}
                         </p>
-                        {key.last_four && (
-                          <code
-                            className="text-[11px] font-mono bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded"
-                            title="Last 4 characters of this key — use to identify which tool is using it"
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {isConfirming ? (
+                          <>
+                            <span className="text-xs text-red-600">
+                              Revoke this key?
+                            </span>
+                            <button
+                              onClick={() => handleDeleteKey(key.id)}
+                              className="text-xs bg-red-600 text-white px-2.5 py-1 rounded-lg font-medium hover:bg-red-700"
+                            >
+                              Revoke now
+                            </button>
+                            <button
+                              onClick={() => setConfirmRevokeId(null)}
+                              className="text-xs text-gray-500 hover:text-gray-700 px-2"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmRevokeId(key.id)}
+                            className="text-xs text-red-500 hover:text-red-700 hover:underline"
                           >
-                            tm_sk_••••{key.last_four}
-                          </code>
+                            Revoke
+                          </button>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Created{" "}
-                        {new Date(key.created_at).toLocaleDateString()}
-                        {key.last_used_at
-                          ? ` · Last used ${new Date(key.last_used_at).toLocaleDateString()}`
-                          : " · Never used"}
-                      </p>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                        {key.permissions.collections === "*"
-                          ? "Full access"
-                          : "Scoped"}
-                      </span>
-                      <button
-                        onClick={() => handleDeleteKey(key.id)}
-                        className="text-xs text-red-500 hover:underline"
-                      >
-                        Revoke
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
