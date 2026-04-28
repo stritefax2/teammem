@@ -339,92 +339,112 @@ export function LandingPage() {
             read-only prod password into MCP configs, or build plumbing yourself.
           </p>
 
-          <div className="mt-12 grid sm:grid-cols-2 gap-4">
-            {/* Before */}
-            <div className="bg-white rounded-xl p-5 border border-red-100 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-5 h-5 rounded-full bg-red-100 text-red-500 flex items-center justify-center shrink-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-3 h-3"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
-                <span className="text-sm font-semibold text-red-600">
-                  Without TeamMem
-                </span>
+          <div className="mt-12 max-w-3xl mx-auto bg-gray-950 rounded-xl ring-1 ring-gray-200 shadow-lg shadow-gray-900/[0.04] overflow-hidden">
+            {/* Diff header */}
+            <div className="flex items-center justify-between gap-4 px-4 py-2.5 border-b border-gray-800 bg-gray-900/60">
+              <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
+                <svg
+                  className="w-3.5 h-3.5 text-gray-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.75}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14 2v6h6"
+                  />
+                </svg>
+                team-stack.diff
               </div>
-              <ul className="space-y-2 text-sm text-gray-600 leading-snug">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-300 mt-1 shrink-0">–</span>
-                  Pasting the customer list into chat—again
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-300 mt-1 shrink-0">–</span>
-                  Same read-only prod password in four MCP configs
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-300 mt-1 shrink-0">–</span>
-                  Sales agent sees revenue, PII—everything
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-300 mt-1 shrink-0">–</span>
-                  Zero log of what agents read, or when
-                </li>
-              </ul>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500">
+                <span className="text-red-400/80">−4</span>{" "}
+                <span className="text-emerald-400/80">+4</span>
+              </span>
             </div>
 
-            {/* After */}
-            <div className="bg-white rounded-xl p-5 border border-green-100 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-3 h-3"
+            {/* Diff body */}
+            <div className="font-mono text-[13px] leading-[1.7] py-2">
+              {[
+                { sign: "-", text: "Pasting the customer list into chat — again" },
+                {
+                  sign: "-",
+                  text: "Same read-only prod password in four MCP configs",
+                },
+                {
+                  sign: "-",
+                  text: "Sales agent sees revenue, PII — everything",
+                },
+                {
+                  sign: "-",
+                  text: "Zero log of what agents read, or when",
+                },
+                {
+                  sign: "+",
+                  text: "One Postgres connector — every agent via TeamMem",
+                },
+                {
+                  sign: "+",
+                  text: "Credentials encrypted — never in agent configs",
+                },
+                {
+                  sign: "+",
+                  jsx: (
+                    <>
+                      Per-agent columns — sales gets{" "}
+                      <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">
+                        email
+                      </code>
+                      , not{" "}
+                      <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">
+                        credit_card_last4
+                      </code>
+                    </>
+                  ),
+                },
+                { sign: "+", text: "Audit: agent, row, timestamp" },
+              ].map((line, i) => {
+                const isAdd = line.sign === "+";
+                return (
+                  <div
+                    key={i}
+                    className={`flex items-start ${
+                      isAdd ? "bg-emerald-500/[0.06]" : "bg-red-500/[0.05]"
+                    }`}
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </span>
-                <span className="text-sm font-semibold text-green-600">
-                  With TeamMem
-                </span>
-              </div>
-              <ul className="space-y-2 text-sm text-gray-600 leading-snug">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5 shrink-0">+</span>
-                  One Postgres connector—every agent via TeamMem
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5 shrink-0">+</span>
-                  Credentials encrypted—never in agent configs
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5 shrink-0">+</span>
-                  Per-agent columns—sales gets{" "}
-                  <code className="text-xs bg-gray-100 px-1 rounded">email</code>,
-                  not{" "}
-                  <code className="text-xs bg-gray-100 px-1 rounded">
-                    credit_card_last4
-                  </code>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5 shrink-0">+</span>
-                  Audit: agent, row, timestamp
-                </li>
-              </ul>
+                    <span
+                      className={`w-10 text-center select-none py-1 shrink-0 ${
+                        isAdd ? "text-emerald-400/90" : "text-red-400/80"
+                      }`}
+                    >
+                      {line.sign}
+                    </span>
+                    <span
+                      className={`flex-1 pr-4 py-1 ${
+                        isAdd ? "text-gray-100" : "text-gray-400"
+                      }`}
+                    >
+                      {line.jsx ?? line.text}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Diff footer */}
+            <div className="flex items-center justify-between gap-4 px-4 py-2 border-t border-gray-800 bg-gray-900/60 text-[11px] font-mono text-gray-500">
+              <span>
+                <span className="text-gray-400">a/</span>your-current-stack
+                <span className="text-gray-600 mx-1">→</span>
+                <span className="text-gray-400">b/</span>teammem
+              </span>
+              <span className="hidden sm:inline">migration · ~5 min</span>
             </div>
           </div>
         </div>
