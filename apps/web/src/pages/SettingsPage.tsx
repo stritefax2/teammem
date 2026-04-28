@@ -109,7 +109,7 @@ function summarizeScope(permissions: Record<string, unknown>): string {
 
 export function SettingsPage() {
   const { id } = useParams<{ id: string }>();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") as Tab) || "members";
@@ -130,6 +130,10 @@ export function SettingsPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [agentKeys, setAgentKeys] = useState<AgentKeyInfo[]>([]);
+  const [workspaceName, setWorkspaceName] = useState("");
+  const [confirmDeleteName, setConfirmDeleteName] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deletingWorkspace, setDeletingWorkspace] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("editor");
@@ -137,6 +141,7 @@ export function SettingsPage() {
   const [inviteSuccess, setInviteSuccess] = useState("");
 
   const [showKeyForm, setShowKeyForm] = useState(false);
+  const [editingKeyId, setEditingKeyId] = useState<string | null>(null);
   const [keyName, setKeyName] = useState("");
   const [keyAccess, setKeyAccess] = useState<"all" | "scoped">("all");
   const [newRawKey, setNewRawKey] = useState("");
@@ -173,6 +178,9 @@ export function SettingsPage() {
   useEffect(() => {
     loadMembers();
     if (!id) return;
+    apiFetch<{ workspace: { name: string } }>(`/api/v1/workspaces/${id}`).then(
+      (data) => setWorkspaceName(data.workspace.name)
+    );
     apiFetch<{ agent_keys: AgentKeyInfo[] }>(
       `/api/v1/agent-keys?workspace_id=${id}`
     ).then((data) => setAgentKeys(data.agent_keys));
@@ -229,7 +237,7 @@ export function SettingsPage() {
     }
   }
 
-  async function handleCreateKey(e: FormEvent) {
+  async function handleSaveKey(e: FormEvent) {
     e.preventDefault();
 
     let permissions: Record<string, unknown>;
@@ -263,21 +271,75 @@ export function SettingsPage() {
       };
     }
 
-    const data = await apiFetch<{ agent_key: AgentKeyInfo; raw_key: string }>(
-      "/api/v1/agent-keys",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          workspace_id: id,
-          name: keyName,
-          permissions,
-        }),
-      }
-    );
-    setNewRawKey(data.raw_key);
-    setAgentKeys((prev) => [data.agent_key, ...prev]);
+    if (editingKeyId) {
+      // PUT — change scope/name on an existing key without rotating the
+      // secret. Tools using the key keep working.
+      const data = await apiFetch<{ agent_key: AgentKeyInfo }>(
+        `/api/v1/agent-keys/${editingKeyId}`,
+        {
+          method: "PUT",
+          body: JSON.stringify({ name: keyName, permissions }),
+        }
+      );
+      setAgentKeys((prev) =>
+        prev.map((k) => (k.id === editingKeyId ? data.agent_key : k))
+      );
+    } else {
+      const data = await apiFetch<{ agent_key: AgentKeyInfo; raw_key: string }>(
+        "/api/v1/agent-keys",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            workspace_id: id,
+            name: keyName,
+            permissions,
+          }),
+        }
+      );
+      setNewRawKey(data.raw_key);
+      setAgentKeys((prev) => [data.agent_key, ...prev]);
+    }
+
     setKeyName("");
+    setEditingKeyId(null);
     setShowKeyForm(false);
+  }
+
+  // Reconstruct the form state from a stored key's permissions object so
+  // the edit dialog opens prefilled with what's already deployed.
+  function startEditKey(key: AgentKeyInfo) {
+    const perms = key.permissions as {
+      collections?: "*" | Record<string, string[]>;
+      field_restrictions?: Record<string, { deny_fields?: string[] }>;
+    };
+    setKeyName(key.name);
+    if (perms.collections === "*" || perms.collections === undefined) {
+      setKeyAccess("all");
+    } else {
+      setKeyAccess("scoped");
+      const colMap = perms.collections as Record<string, string[]>;
+      const next: Record<string, ColPerms> = {};
+      for (const col of workspaceCollections) {
+        const allowed = colMap[col.name] ?? [];
+        const denyFields =
+          perms.field_restrictions?.[col.name]?.deny_fields ?? [];
+        next[col.name] = {
+          read: allowed.includes("read"),
+          write: allowed.includes("write"),
+          delete: allowed.includes("delete"),
+          deny_fields: new Set(denyFields),
+        };
+      }
+      setScopedPerms(next);
+    }
+    setEditingKeyId(key.id);
+    setShowKeyForm(true);
+  }
+
+  function cancelKeyForm() {
+    setShowKeyForm(false);
+    setEditingKeyId(null);
+    setKeyName("");
   }
 
   function updatePerm<K extends keyof ColPerms>(
@@ -313,6 +375,30 @@ export function SettingsPage() {
     setAgentKeys((prev) => prev.filter((k) => k.id !== keyId));
     setConfirmRevokeId(null);
   }
+
+  async function handleDeleteWorkspace() {
+    if (!id) return;
+    setDeletingWorkspace(true);
+    setDeleteError("");
+    try {
+      await apiFetch(`/api/v1/workspaces/${id}`, {
+        method: "DELETE",
+        body: JSON.stringify({ confirm_name: confirmDeleteName }),
+      });
+      navigate("/dashboard");
+    } catch (err: any) {
+      setDeleteError(
+        err.message || "Couldn't delete this workspace — try again."
+      );
+    } finally {
+      setDeletingWorkspace(false);
+    }
+  }
+
+  // True only if the current user is a confirmed owner of this workspace.
+  // Editors and viewers don't see the Danger Zone at all.
+  const currentUserRole = members.find((m) => m.id === user?.id)?.role;
+  const isOwner = currentUserRole === "owner";
 
   return (
     <AppShell
@@ -617,6 +703,75 @@ export function SettingsPage() {
                 </div>
               </>
             )}
+
+            {/* Danger Zone — owners only. Hard to undo, easy to type past. */}
+            {isOwner && workspaceName && (
+              <div className="mt-12 pt-6 border-t border-gray-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-red-600">
+                    Danger zone
+                  </h3>
+                </div>
+                <div className="bg-white border border-red-200 rounded-md overflow-hidden">
+                  <div className="p-4 border-b border-red-100">
+                    <p className="text-sm font-semibold text-gray-900">
+                      Delete this workspace
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                      Permanently removes the workspace and{" "}
+                      <span className="font-medium text-gray-900">
+                        every collection, entry, agent key, audit record, and
+                        connected source
+                      </span>{" "}
+                      under it. Connected source databases are{" "}
+                      <span className="font-medium text-gray-900">
+                        not
+                      </span>{" "}
+                      touched — only TeamMem's mirror of them. This cannot
+                      be undone.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-red-50/40">
+                    <label className="block">
+                      <span className="text-xs font-medium text-gray-700">
+                        Type{" "}
+                        <code className="font-mono bg-white border border-gray-200 px-1.5 py-0.5 rounded text-gray-900">
+                          {workspaceName}
+                        </code>{" "}
+                        to confirm
+                      </span>
+                      <input
+                        type="text"
+                        value={confirmDeleteName}
+                        onChange={(e) => setConfirmDeleteName(e.target.value)}
+                        placeholder={workspaceName}
+                        className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-red-600 focus:ring-1 focus:ring-red-600 outline-none"
+                      />
+                    </label>
+                    {deleteError && (
+                      <p className="mt-2 text-xs text-red-700">
+                        {deleteError}
+                      </p>
+                    )}
+                    <div className="mt-3 flex items-center justify-end">
+                      <button
+                        type="button"
+                        onClick={handleDeleteWorkspace}
+                        disabled={
+                          deletingWorkspace ||
+                          confirmDeleteName !== workspaceName
+                        }
+                        className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {deletingWorkspace
+                          ? "Deleting…"
+                          : "Delete workspace permanently"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -649,9 +804,19 @@ export function SettingsPage() {
 
             {showKeyForm && (
               <form
-                onSubmit={handleCreateKey}
+                onSubmit={handleSaveKey}
                 className="mb-6 bg-white p-5 rounded-md border border-gray-200"
               >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    {editingKeyId ? "Edit agent key" : "New agent key"}
+                  </h3>
+                  {editingKeyId && (
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded">
+                      key value unchanged · tools keep working
+                    </span>
+                  )}
+                </div>
                 <label className="block mb-3">
                   <span className="text-xs font-medium text-gray-700">
                     Key name
@@ -835,11 +1000,11 @@ export function SettingsPage() {
                     type="submit"
                     className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
                   >
-                    Create key
+                    {editingKeyId ? "Save changes" : "Create key"}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowKeyForm(false)}
+                    onClick={cancelKeyForm}
                     className="text-gray-500 px-3 py-2 text-sm hover:text-gray-700"
                   >
                     Cancel
@@ -909,7 +1074,7 @@ export function SettingsPage() {
                             </span>
                             <button
                               onClick={() => handleDeleteKey(key.id)}
-                              className="text-xs bg-red-600 text-white px-2.5 py-1 rounded-lg font-medium hover:bg-red-700"
+                              className="text-xs bg-red-600 text-white px-2.5 py-1 rounded-md font-medium hover:bg-red-700"
                             >
                               Revoke now
                             </button>
@@ -921,12 +1086,20 @@ export function SettingsPage() {
                             </button>
                           </>
                         ) : (
-                          <button
-                            onClick={() => setConfirmRevokeId(key.id)}
-                            className="text-xs text-red-500 hover:text-red-700 hover:underline"
-                          >
-                            Revoke
-                          </button>
+                          <>
+                            <button
+                              onClick={() => startEditKey(key)}
+                              className="text-xs text-gray-700 hover:text-gray-900 hover:underline underline-offset-2 decoration-gray-300"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => setConfirmRevokeId(key.id)}
+                              className="text-xs text-red-500 hover:text-red-700 hover:underline"
+                            >
+                              Revoke
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>

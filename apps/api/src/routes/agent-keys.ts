@@ -2,7 +2,10 @@ import { Hono } from "hono";
 import { query } from "../db/client.js";
 import { authMiddleware, hashApiKey, generateApiKey } from "../middleware/auth.js";
 import { requireWorkspaceScope } from "../middleware/workspace-scope.js";
-import { createAgentKeySchema } from "../shared/index.js";
+import {
+  createAgentKeySchema,
+  updateAgentKeySchema,
+} from "../shared/index.js";
 import type { AppEnv } from "../types.js";
 
 export const agentKeyRoutes = new Hono<AppEnv>();
@@ -76,6 +79,50 @@ agentKeyRoutes.post("/", async (c) => {
     },
     201
   );
+});
+
+agentKeyRoutes.put("/:id", async (c) => {
+  const auth = c.get("auth");
+  if (!auth.userId) {
+    return c.json({ error: "User session required to edit agent keys" }, 400);
+  }
+
+  const id = c.req.param("id");
+  const body = await c.req.json();
+  const parsed = updateAgentKeySchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: parsed.error.flatten() }, 400);
+  }
+
+  // Build a dynamic SET clause from whichever fields were provided.
+  // We never touch key_hash or last_four — rotating the secret is a
+  // separate operation (revoke + recreate). This is intentional.
+  const sets: string[] = [];
+  const params: unknown[] = [];
+  if (parsed.data.name !== undefined) {
+    params.push(parsed.data.name);
+    sets.push(`name = $${params.length}`);
+  }
+  if (parsed.data.permissions !== undefined) {
+    params.push(parsed.data.permissions);
+    sets.push(`permissions = $${params.length}`);
+  }
+  params.push(id);
+
+  const result = await query(
+    `UPDATE agent_keys
+       SET ${sets.join(", ")}
+     WHERE id = $${params.length}
+     RETURNING id, workspace_id, created_by, name, permissions,
+               last_used_at, last_four, created_at`,
+    params
+  );
+
+  if (result.rows.length === 0) {
+    return c.json({ error: "Agent key not found" }, 404);
+  }
+
+  return c.json({ agent_key: result.rows[0] });
 });
 
 agentKeyRoutes.delete("/:id", async (c) => {

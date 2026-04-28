@@ -89,9 +89,9 @@ searchRoutes.post("/", async (c) => {
       }
 
       const sql = `
-        SELECT DISTINCT ON (entry_id) entry_id, collection, content, structured_data, relevance_score, chunk_text
+        SELECT DISTINCT ON (entry_id) entry_id, collection_id, collection, content, structured_data, relevance_score, chunk_text
         FROM (
-          SELECT e.id AS entry_id, c.name AS collection, e.content, e.structured_data,
+          SELECT e.id AS entry_id, c.id AS collection_id, c.name AS collection, e.content, e.structured_data,
                  1 - (e.embedding <=> $1::vector) AS relevance_score,
                  NULL AS chunk_text
           FROM entries e
@@ -100,7 +100,7 @@ searchRoutes.post("/", async (c) => {
 
           UNION ALL
 
-          SELECT e.id AS entry_id, c.name AS collection, e.content, e.structured_data,
+          SELECT e.id AS entry_id, c.id AS collection_id, c.name AS collection, e.content, e.structured_data,
                  1 - (ec.embedding <=> $1::vector) AS relevance_score,
                  ec.chunk_text
           FROM entry_chunks ec
@@ -119,6 +119,7 @@ searchRoutes.post("/", async (c) => {
         .slice(0, effectiveLimit)
         .map((r: any) => ({
           entry_id: r.entry_id,
+          collection_id: r.collection_id,
           collection: r.collection,
           content: r.chunk_text || (r.content?.slice(0, 500) ?? null),
           structured_data: r.structured_data,
@@ -132,7 +133,7 @@ searchRoutes.post("/", async (c) => {
   if (results.length === 0 && canFulltext) {
     const params: unknown[] = [searchQuery, workspaceId, effectiveLimit];
     let sql = `
-      SELECT e.id AS entry_id, c.name AS collection, e.content, e.structured_data,
+      SELECT e.id AS entry_id, c.id AS collection_id, c.name AS collection, e.content, e.structured_data,
              ts_rank(to_tsvector('english', COALESCE(e.content, '')), plainto_tsquery($1)) AS relevance_score
       FROM entries e
       INNER JOIN collections c ON e.collection_id = c.id

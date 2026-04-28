@@ -5,6 +5,7 @@ import { apiFetch } from "../lib/api.js";
 
 interface SearchResult {
   entry_id: string;
+  collection_id: string;
   collection: string;
   content: string | null;
   structured_data: Record<string, unknown> | null;
@@ -138,9 +139,8 @@ export function AppShell({
                           type="button"
                           onClick={() => {
                             clearSearch();
-                            const wsId = workspaceId;
                             navigate(
-                              `/w/${wsId}/c/${(r.structured_data as any)?.collection_id || ""}/entry/${r.entry_id}`
+                              `/w/${workspaceId}/c/${r.collection_id}/entry/${r.entry_id}`
                             );
                           }}
                           className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"

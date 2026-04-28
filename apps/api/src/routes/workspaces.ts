@@ -64,6 +64,56 @@ workspaceRoutes.get("/:id", requireWorkspaceMember, async (c) => {
   return c.json({ workspace: result.rows[0] });
 });
 
+// Delete a workspace and everything attached to it. Owner-only — editors
+// and viewers can't take down a shared workspace. Requires the caller to
+// confirm by re-typing the workspace name in `confirm_name`, which prevents
+// fat-finger destruction. All child rows cascade via FK ON DELETE CASCADE.
+workspaceRoutes.delete("/:id", requireWorkspaceMember, async (c) => {
+  const id = c.req.param("id");
+  const auth = c.get("auth");
+  if (!auth.userId) {
+    return c.json({ error: "User session required" }, 400);
+  }
+
+  const memberResult = await query<{ role: string }>(
+    "SELECT role FROM workspace_members WHERE workspace_id = $1 AND user_id = $2 AND accepted_at IS NOT NULL",
+    [id, auth.userId]
+  );
+  if (
+    memberResult.rows.length === 0 ||
+    memberResult.rows[0].role !== "owner"
+  ) {
+    return c.json(
+      { error: "Only workspace owners can delete the workspace" },
+      403
+    );
+  }
+
+  const wsResult = await query<{ name: string }>(
+    "SELECT name FROM workspaces WHERE id = $1",
+    [id]
+  );
+  if (wsResult.rows.length === 0) {
+    return c.json({ error: "Workspace not found" }, 404);
+  }
+
+  const body = await c.req.json().catch(() => ({}) as Record<string, unknown>);
+  const confirmName = typeof body.confirm_name === "string" ? body.confirm_name : "";
+  if (confirmName !== wsResult.rows[0].name) {
+    return c.json(
+      {
+        error:
+          "Type the workspace name exactly to confirm deletion.",
+        code: "confirm_name_required",
+      },
+      400
+    );
+  }
+
+  await query("DELETE FROM workspaces WHERE id = $1", [id]);
+  return c.json({ message: "Workspace deleted" });
+});
+
 workspaceRoutes.get("/:id/members", requireWorkspaceMember, async (c) => {
   const id = c.req.param("id");
   const result = await query(

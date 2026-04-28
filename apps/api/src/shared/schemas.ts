@@ -181,33 +181,47 @@ export const aggregateSchema = z.object({
   limit: z.number().int().min(1).max(500).default(100),
 });
 
+const agentPermissionsSchema = z.object({
+  collections: z.union([
+    z.literal("*"),
+    z.record(z.array(z.enum(["read", "write", "delete"]))),
+  ]),
+  field_restrictions: z
+    .record(z.object({ deny_fields: z.array(z.string()) }))
+    .optional(),
+  write_constraints: z
+    .object({
+      require_review: z.boolean().optional(),
+      max_entries_per_hour: z.number().int().positive().optional(),
+      can_delete: z.boolean().optional(),
+    })
+    .optional(),
+  query_constraints: z
+    .object({
+      max_results_per_query: z.number().int().positive().optional(),
+      allowed_query_types: z
+        .array(z.enum(["semantic", "structured", "fulltext"]))
+        .optional(),
+    })
+    .optional(),
+});
+
 export const createAgentKeySchema = z.object({
   name: z.string().min(1).max(100),
-  permissions: z.object({
-    collections: z.union([
-      z.literal("*"),
-      z.record(z.array(z.enum(["read", "write", "delete"]))),
-    ]),
-    field_restrictions: z
-      .record(z.object({ deny_fields: z.array(z.string()) }))
-      .optional(),
-    write_constraints: z
-      .object({
-        require_review: z.boolean().optional(),
-        max_entries_per_hour: z.number().int().positive().optional(),
-        can_delete: z.boolean().optional(),
-      })
-      .optional(),
-    query_constraints: z
-      .object({
-        max_results_per_query: z.number().int().positive().optional(),
-        allowed_query_types: z
-          .array(z.enum(["semantic", "structured", "fulltext"]))
-          .optional(),
-      })
-      .optional(),
-  }),
+  permissions: agentPermissionsSchema,
 });
+
+// Update permits changing name and/or permissions, but not the key value
+// itself — rotating the secret requires revoke + recreate by design.
+export const updateAgentKeySchema = z
+  .object({
+    name: z.string().min(1).max(100).optional(),
+    permissions: agentPermissionsSchema.optional(),
+  })
+  .refine(
+    (data) => data.name !== undefined || data.permissions !== undefined,
+    { message: "At least one of name or permissions must be provided" }
+  );
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -219,6 +233,7 @@ export type UpdateEntryInput = z.infer<typeof updateEntrySchema>;
 export type SearchInput = z.infer<typeof searchSchema>;
 export type StructuredQueryInput = z.infer<typeof structuredQuerySchema>;
 export type CreateAgentKeyInput = z.infer<typeof createAgentKeySchema>;
+export type UpdateAgentKeyInput = z.infer<typeof updateAgentKeySchema>;
 export type SourceConfigInput = z.infer<typeof sourceConfigSchema>;
 export type CreateDataSourceInput = z.infer<typeof createDataSourceSchema>;
 export type AggregateInput = z.infer<typeof aggregateSchema>;
