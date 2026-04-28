@@ -236,12 +236,17 @@ export async function readRows(
       const truncated = result.rows.length > MAX_ROWS_PER_SYNC;
       const rows = result.rows.slice(0, MAX_ROWS_PER_SYNC);
 
-      const synced: SourceRow[] = rows.map((row) => {
+      // Skip rows with a null row-id rather than failing the whole sync. A
+      // few rows with NULL in the chosen column shouldn't prevent the rest
+      // of the table from coming through. We log the count so the user can
+      // see it in the audit / sync error fields.
+      let skippedNullRowId = 0;
+      const synced: SourceRow[] = [];
+      for (const row of rows) {
         const pkVal = row[config.primary_key];
         if (pkVal === null || pkVal === undefined) {
-          throw new Error(
-            `Row in ${config.table} has null primary_key (${config.primary_key})`
-          );
+          skippedNullRowId++;
+          continue;
         }
         const sourceRowId = String(pkVal);
 
@@ -258,12 +263,19 @@ export async function readRows(
               : String(row[config.content_column])
             : null;
 
-        return {
+        synced.push({
           source_row_id: sourceRowId,
           structured_data: structured,
           content,
-        };
-      });
+        });
+      }
+
+      if (skippedNullRowId > 0) {
+        console.warn(
+          `[connector] ${config.table}: skipped ${skippedNullRowId} row(s) ` +
+            `with NULL ${config.primary_key}`
+        );
+      }
 
       return { rows: synced, row_count: synced.length, truncated };
     }

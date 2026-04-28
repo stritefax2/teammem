@@ -64,8 +64,24 @@ export function ConnectedCollectionSetup({
   function pickTable(t: DataSourceTable) {
     setSelectedTable(t);
     setCollectionName(t.name);
+    // Default the row-id column. Preference order:
+    //   1. The declared PRIMARY KEY (if any)
+    //   2. A non-nullable column literally named `id` (extremely common)
+    //   3. The first non-nullable column
+    //   4. As a last resort, the first column (user will need to acknowledge
+    //      this is risky if rows have nulls in this field)
     const pk = t.columns.find((c) => c.is_primary_key);
-    setPrimaryKey(pk?.name || "");
+    const idCol = t.columns.find(
+      (c) => c.name.toLowerCase() === "id" && !c.is_nullable
+    );
+    const firstNonNullable = t.columns.find((c) => !c.is_nullable);
+    const candidate =
+      pk?.name ||
+      idCol?.name ||
+      firstNonNullable?.name ||
+      t.columns[0]?.name ||
+      "";
+    setPrimaryKey(candidate);
     setSelectedCols(new Set(t.columns.map((c) => c.name)));
     setContentCol("");
   }
@@ -163,34 +179,50 @@ export function ConnectedCollectionSetup({
                   {tables.map((t) => {
                     const qualified = `${t.schema}.${t.name}`;
                     const pk = t.columns.find((c) => c.is_primary_key);
+                    const hasNonNullCol = t.columns.some(
+                      (c) => !c.is_nullable
+                    );
                     return (
                       <button
                         key={qualified}
                         onClick={() => pickTable(t)}
-                        disabled={!pk}
-                        className="w-full flex items-center justify-between text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
-                        title={
-                          !pk
-                            ? "This table has no primary key and can't be synced yet."
-                            : ""
-                        }
+                        className="w-full flex items-center justify-between text-left px-4 py-3 rounded-md border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
                       >
-                        <div>
+                        <div className="min-w-0">
                           <code className="text-sm font-mono text-gray-900">
                             {qualified}
                           </code>
                           <p className="text-xs text-gray-500 mt-0.5">
                             {t.columns.length} columns
-                            {pk
-                              ? `, PK: ${pk.name}`
-                              : " — no primary key (skipped)"}
+                            {pk ? (
+                              <>
+                                {" · "}
+                                <span className="text-emerald-700">
+                                  PK detected:{" "}
+                                  <code className="font-mono">{pk.name}</code>
+                                </span>
+                              </>
+                            ) : hasNonNullCol ? (
+                              <>
+                                {" · "}
+                                <span className="text-gray-500">
+                                  no PK — you'll pick a row identifier
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                {" · "}
+                                <span className="text-amber-700">
+                                  all columns nullable — sync may fail on
+                                  rows with no row-id value
+                                </span>
+                              </>
+                            )}
                           </p>
                         </div>
-                        {pk && (
-                          <span className="text-xs text-gray-900 font-medium">
-                            Select →
-                          </span>
-                        )}
+                        <span className="text-xs text-gray-900 font-medium shrink-0 ml-3">
+                          Select →
+                        </span>
                       </button>
                     );
                   })}
@@ -223,25 +255,52 @@ export function ConnectedCollectionSetup({
 
               <label className="block mb-4">
                 <span className="text-sm font-medium text-gray-700">
-                  Primary key column
+                  Row identifier column
                 </span>
                 <select
                   value={primaryKey}
                   onChange={(e) => setPrimaryKey(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                 >
-                  {selectedTable.columns
-                    .filter((c) => !c.is_nullable)
-                    .map((c) => (
+                  {selectedTable.columns.map((c) => {
+                    const tags: string[] = [];
+                    if (c.is_primary_key) tags.push("PK");
+                    if (c.is_nullable) tags.push("nullable");
+                    const tagSuffix = tags.length ? ` — ${tags.join(", ")}` : "";
+                    return (
                       <option key={c.name} value={c.name}>
-                        {c.name} ({c.data_type})
-                        {c.is_primary_key ? " — detected" : ""}
+                        {c.name} ({c.data_type}){tagSuffix}
                       </option>
-                    ))}
+                    );
+                  })}
                 </select>
-                <span className="block mt-1 text-xs text-gray-500">
-                  Used to track rows across syncs and deduplicate.
+                <span className="block mt-1 text-xs text-gray-500 leading-relaxed">
+                  Used to track rows across syncs and deduplicate. Pick a
+                  column that's unique and ideally non-nullable. If a row
+                  has a null in this field, sync will skip it.
                 </span>
+                {(() => {
+                  const col = selectedTable.columns.find(
+                    (c) => c.name === primaryKey
+                  );
+                  if (!col) return null;
+                  if (col.is_nullable) {
+                    return (
+                      <span className="mt-2 inline-flex items-start gap-1.5 text-xs text-amber-800 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md leading-relaxed">
+                        <span className="text-amber-600 mt-0.5 shrink-0">
+                          ⚠
+                        </span>
+                        <span>
+                          <code className="font-mono">{col.name}</code> is
+                          nullable. Rows where this column is{" "}
+                          <code className="font-mono">NULL</code> will fail
+                          to sync.
+                        </span>
+                      </span>
+                    );
+                  }
+                  return null;
+                })()}
               </label>
 
               <div className="mb-4">
