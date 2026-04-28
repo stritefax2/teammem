@@ -133,13 +133,6 @@ export function LandingPage() {
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur border border-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium mb-6 shadow-sm">
-            <span className="relative flex w-1.5 h-1.5">
-              <span className="absolute inset-0 rounded-full bg-blue-500 opacity-60 animate-ping" />
-              <span className="relative w-1.5 h-1.5 rounded-full bg-blue-500" />
-            </span>
-            Postgres in beta · Sheets &amp; Notion next
-          </div>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-[1.05]">
             Give every AI tool
             <br />
