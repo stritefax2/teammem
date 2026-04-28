@@ -127,7 +127,7 @@ export function DocumentUpload({ collectionId, onDone, onClose }: Props) {
             onClick={() => inputRef.current?.click()}
             className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
               dragOver
-                ? "border-blue-500 bg-blue-50"
+                ? "border-gray-900 bg-gray-50"
                 : "border-gray-300 hover:border-gray-400"
             }`}
           >
@@ -172,14 +172,14 @@ export function DocumentUpload({ collectionId, onDone, onClose }: Props) {
                     value={pf.title}
                     onChange={(e) => updatePending(idx, "title", e.target.value)}
                     placeholder="Document title"
-                    className="block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none mb-2"
+                    className="block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none mb-2"
                   />
                   <input
                     type="text"
                     value={pf.tags}
                     onChange={(e) => updatePending(idx, "tags", e.target.value)}
                     placeholder="Tags: company:Tesla, year:2024, filing_type:10-K"
-                    className="block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs text-gray-600 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                   />
                 </div>
               ))}
@@ -207,7 +207,7 @@ export function DocumentUpload({ collectionId, onDone, onClose }: Props) {
             <button
               type="submit"
               disabled={uploading || pendingFiles.length === 0}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
             >
               {uploading
                 ? "Uploading..."

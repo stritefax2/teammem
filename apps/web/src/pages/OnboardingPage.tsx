@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api.js";
 import { ConnectDataSource } from "../components/ConnectDataSource.js";
 import { ConnectedCollectionSetup } from "../components/ConnectedCollectionSetup.js";
+import { NewKeyPanel } from "../components/NewKeyPanel.js";
 
 interface Workspace {
   id: string;
@@ -59,7 +60,7 @@ export function OnboardingPage() {
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [selectedTemplates, setSelectedTemplates] = useState<Set<number>>(
-    new Set([0, 2])
+    new Set()
   );
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,6 +69,31 @@ export function OnboardingPage() {
   const [connectedCollections, setConnectedCollections] = useState<
     Collection[]
   >([]);
+  const [firstKeyName, setFirstKeyName] = useState("Claude Desktop");
+  const [firstKeyRaw, setFirstKeyRaw] = useState<string | null>(null);
+  const [keyCreating, setKeyCreating] = useState(false);
+  const [keyError, setKeyError] = useState("");
+
+  async function handleCreateFirstKey() {
+    if (!workspace || !firstKeyName.trim()) return;
+    setKeyCreating(true);
+    setKeyError("");
+    try {
+      const data = await apiFetch<{ raw_key: string }>("/api/v1/agent-keys", {
+        method: "POST",
+        body: JSON.stringify({
+          workspace_id: workspace.id,
+          name: firstKeyName.trim(),
+          permissions: { collections: "*" },
+        }),
+      });
+      setFirstKeyRaw(data.raw_key);
+    } catch (err: any) {
+      setKeyError(err.message || "Couldn't create key — try again.");
+    } finally {
+      setKeyCreating(false);
+    }
+  }
 
   async function handleCreateWorkspace(e: FormEvent) {
     e.preventDefault();
@@ -138,20 +164,26 @@ export function OnboardingPage() {
       <div className="w-full max-w-lg">
         {/* Progress */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          {[1, 2, 3, 4].map((s) => (
-            <div key={s} className="flex items-center gap-2">
+          {[
+            { n: 1, label: "Workspace" },
+            { n: 2, label: "Data" },
+            { n: 3, label: "Collections" },
+            { n: 4, label: "Connect" },
+          ].map((s, i) => (
+            <div key={s.n} className="flex items-center gap-2">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                  s < step
-                    ? "bg-green-500 text-white"
-                    : s === step
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-500"
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium font-mono transition-colors ${
+                  s.n < step
+                    ? "bg-emerald-500 text-white"
+                    : s.n === step
+                      ? "bg-gray-900 text-white"
+                      : "bg-gray-100 text-gray-400 border border-gray-200"
                 }`}
+                title={s.label}
               >
-                {s < step ? (
+                {s.n < step ? (
                   <svg
-                    className="w-4 h-4"
+                    className="w-3.5 h-3.5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -159,17 +191,17 @@ export function OnboardingPage() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       d="M5 13l4 4L19 7"
                     />
                   </svg>
                 ) : (
-                  s
+                  s.n
                 )}
               </div>
-              {s < 4 && (
+              {i < 3 && (
                 <div
-                  className={`w-8 h-0.5 ${s < step ? "bg-green-500" : "bg-gray-200"}`}
+                  className={`w-8 h-px ${s.n < step ? "bg-emerald-500" : "bg-gray-200"}`}
                 />
               )}
             </div>
@@ -194,12 +226,12 @@ export function OnboardingPage() {
                 placeholder="e.g. Acme Corp, Product Team, My Startup"
                 required
                 autoFocus
-                className="block w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                className="block w-full rounded-md border border-gray-300 px-4 py-3 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
               />
               <button
                 type="submit"
                 disabled={loading || !workspaceName.trim()}
-                className="mt-6 w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="mt-6 w-full bg-gray-900 text-white py-3 rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
               >
                 {loading ? "Creating..." : "Create workspace"}
               </button>
@@ -244,9 +276,9 @@ export function OnboardingPage() {
                 ].map((src) => (
                   <div
                     key={src.name}
-                    className={`flex items-center justify-between p-4 rounded-xl border-2 ${
+                    className={`flex items-center justify-between p-3.5 rounded-md border ${
                       src.ready
-                        ? "border-blue-500 bg-blue-50/50"
+                        ? "border-gray-300 bg-white"
                         : "border-gray-100 bg-gray-50"
                     }`}
                   >
@@ -261,19 +293,22 @@ export function OnboardingPage() {
                       <p className="text-xs text-gray-500">{src.sub}</p>
                     </div>
                     {src.ready ? (
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                        Available
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                        beta
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-400">Soon</span>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-gray-400">
+                        soon
+                      </span>
                     )}
                   </div>
                 ))}
               </div>
 
               {connectedCollections.length > 0 && (
-                <div className="mb-4 bg-green-50 border border-green-200 rounded-xl p-3">
-                  <p className="text-sm font-medium text-green-800 mb-1">
+                <div className="mb-4 bg-emerald-50/60 border border-emerald-200 rounded-md p-3">
+                  <p className="text-sm font-medium text-emerald-900 mb-1.5 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     {connectedCollections.length} connected collection
                     {connectedCollections.length !== 1 ? "s" : ""} ready
                   </p>
@@ -281,7 +316,7 @@ export function OnboardingPage() {
                     {connectedCollections.map((c) => (
                       <span
                         key={c.id}
-                        className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full"
+                        className="text-xs bg-white border border-emerald-200 text-emerald-700 px-2 py-0.5 rounded font-mono"
                       >
                         {c.name}
                       </span>
@@ -292,7 +327,7 @@ export function OnboardingPage() {
 
               <button
                 onClick={() => setShowConnectModal(true)}
-                className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                className="w-full bg-gray-900 text-white py-3 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
               >
                 {connectedCollections.length > 0
                   ? "Connect another database"
@@ -301,7 +336,7 @@ export function OnboardingPage() {
               {connectedCollections.length > 0 ? (
                 <button
                   onClick={handleConnectLater}
-                  className="mt-2 w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors"
+                  className="mt-2 w-full bg-white text-gray-700 border border-gray-200 py-2.5 rounded-md text-sm font-medium hover:border-gray-300 transition-colors"
                 >
                   Continue
                 </button>
@@ -310,7 +345,7 @@ export function OnboardingPage() {
                   onClick={handleConnectLater}
                   className="mt-2 w-full text-gray-500 py-2 text-sm hover:text-gray-700"
                 >
-                  I'll connect later — skip to native collections
+                  I'll connect later — skip ahead
                 </button>
               )}
 
@@ -339,16 +374,21 @@ export function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 3: Pick native collections */}
+          {/* Step 3: Pick native collections (optional) */}
           {step === 3 && (
             <div className="p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Where should agents write?
-              </h2>
-              <p className="text-sm text-gray-500 mb-6">
-                Native collections are writable — this is where your agents
-                capture decisions, meeting notes, and observations about your
-                connected data. Pick a few to start.
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Native collections
+                </h2>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded">
+                  optional
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                Optional, writable collections — useful if you want agents to
+                log decisions or observations alongside the data they read.
+                You can always add these later.
               </p>
               <div className="space-y-2">
                 {TEMPLATES.map((tpl, idx) => (
@@ -356,13 +396,13 @@ export function OnboardingPage() {
                     key={tpl.name}
                     type="button"
                     onClick={() => toggleTemplate(idx)}
-                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                    className={`w-full flex items-center gap-4 p-3.5 rounded-md border text-left transition-all ${
                       selectedTemplates.has(idx)
-                        ? "border-blue-500 bg-blue-50/50"
+                        ? "border-gray-900 bg-gray-50"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <span className="text-2xl">{tpl.icon}</span>
+                    <span className="text-xl opacity-80">{tpl.icon}</span>
                     <div className="flex-1">
                       <p className="font-medium text-gray-900 text-sm">
                         {tpl.name}
@@ -370,15 +410,15 @@ export function OnboardingPage() {
                       <p className="text-xs text-gray-500">{tpl.desc}</p>
                     </div>
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors shrink-0 ${
                         selectedTemplates.has(idx)
-                          ? "border-blue-500 bg-blue-500"
+                          ? "border-gray-900 bg-gray-900"
                           : "border-gray-300"
                       }`}
                     >
                       {selectedTemplates.has(idx) && (
                         <svg
-                          className="w-3 h-3 text-white"
+                          className="w-2.5 h-2.5 text-white"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -396,19 +436,19 @@ export function OnboardingPage() {
                 ))}
               </div>
               <button
-                onClick={handleCreateCollections}
-                disabled={loading || selectedTemplates.size === 0}
-                className="mt-6 w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                onClick={
+                  selectedTemplates.size === 0
+                    ? () => setStep(4)
+                    : handleCreateCollections
+                }
+                disabled={loading}
+                className="mt-6 w-full bg-gray-900 text-white py-3 rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
               >
                 {loading
                   ? "Setting up..."
-                  : `Create ${selectedTemplates.size} collection${selectedTemplates.size !== 1 ? "s" : ""}`}
-              </button>
-              <button
-                onClick={() => setStep(4)}
-                className="mt-2 w-full text-gray-500 py-2 text-sm hover:text-gray-700"
-              >
-                Skip — I'll set up collections later
+                  : selectedTemplates.size === 0
+                    ? "Skip — continue without native collections"
+                    : `Create ${selectedTemplates.size} collection${selectedTemplates.size !== 1 ? "s" : ""} & continue`}
               </button>
             </div>
           )}
@@ -416,93 +456,110 @@ export function OnboardingPage() {
           {/* Step 4: How it works */}
           {step === 4 && (
             <div className="p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                 You're ready to connect agents
               </h2>
-              <p className="text-sm text-gray-500 mb-6">
-                Here's how agents get access to your workspace.
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                Each AI tool — Claude Desktop, Cursor, ChatGPT — connects via
+                its own scoped key. Generate the key in Settings, paste the
+                MCP config into the tool, done.
               </p>
 
               {/* The core loop */}
-              <div className="space-y-4 mb-6">
-                <div className="flex items-start gap-3 bg-blue-50 rounded-xl p-4">
-                  <span className="text-lg shrink-0">🔑</span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Generate a scoped agent key
-                    </p>
-                    <p className="text-xs text-gray-600 mt-0.5">
-                      Settings → Agent Keys. Each AI tool gets its own key,
-                      with its own table-level and column-level permissions.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 bg-green-50 rounded-xl p-4">
-                  <span className="text-lg shrink-0">🔌</span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Paste the MCP config into Claude, Cursor, or ChatGPT
-                    </p>
-                    <p className="text-xs text-gray-600 mt-0.5">
-                      Works with any MCP-compatible tool. The config is
-                      pre-filled with your key and workspace ID.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 bg-purple-50 rounded-xl p-4">
-                  <span className="text-lg shrink-0">📡</span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Agents read connected data, write to native collections
-                    </p>
-                    <p className="text-xs text-gray-600 mt-0.5">
-                      Every read is audited. Source DB stays untouched.
-                      Decisions and observations accumulate in native
-                      collections your whole team's AI can reference.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <ol className="space-y-3 mb-6">
+                {[
+                  {
+                    step: "1",
+                    title: "Generate a scoped agent key",
+                    body: "Settings → Agent Keys. Each AI tool gets its own key with its own table-level and column-level permissions.",
+                  },
+                  {
+                    step: "2",
+                    title: "Paste the MCP config into your tool",
+                    body: "Works with any MCP-compatible tool. The config is pre-filled with your key and workspace ID.",
+                  },
+                  {
+                    step: "3",
+                    title: "Agents read connected data, write to native collections",
+                    body: "Every read is audited. Source DB stays untouched. All writes go to native collections only.",
+                  },
+                ].map((item) => (
+                  <li
+                    key={item.step}
+                    className="flex items-start gap-3 bg-white border border-gray-200 rounded-md p-4"
+                  >
+                    <span className="w-6 h-6 rounded-full bg-gray-900 text-white text-xs font-mono flex items-center justify-center shrink-0 mt-0.5">
+                      {item.step}
+                    </span>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                        {item.body}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
 
-              {/* MCP config */}
-              <div className="bg-gray-950 rounded-xl p-4 mb-4">
-                <p className="text-xs text-gray-400 mb-2">
-                  Preview of the MCP config you'll paste (key is generated in{" "}
-                  <span className="text-gray-300 font-medium">
-                    Settings → Agent Keys
-                  </span>
-                  ):
-                </p>
-                <pre className="text-xs text-gray-300 overflow-x-auto leading-relaxed">
-{`{
-  "mcpServers": {
-    "teammem": {
-      "command": "npx",
-      "args": ["-y", "teammem-mcp"],
-      "env": {`}
-                  <span className="text-green-400">{`
-        "TEAMMEM_API_KEY": "generate in Settings"`}</span>
-                  {`,`}
-                  <span className="text-blue-400">{`
-        "TEAMMEM_WORKSPACE": "${workspace?.id || "your-workspace-id"}"`}</span>
-{`
-      }
-    }
-  }
-}`}
-                </pre>
-              </div>
+              {/* Inline first-key creator */}
+              {firstKeyRaw && workspace ? (
+                <div className="mb-4">
+                  <NewKeyPanel
+                    rawKey={firstKeyRaw}
+                    workspaceId={workspace.id}
+                  />
+                </div>
+              ) : (
+                <div className="bg-white border border-gray-200 rounded-md p-4 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded">
+                      now
+                    </span>
+                    <p className="text-sm font-medium text-gray-900">
+                      Generate your first agent key
+                    </p>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+                    Full-access key for your first AI tool. You can scope
+                    later keys to specific tables and redact specific
+                    columns.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      value={firstKeyName}
+                      onChange={(e) => setFirstKeyName(e.target.value)}
+                      placeholder="e.g. Claude Desktop"
+                      className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCreateFirstKey}
+                      disabled={keyCreating || !firstKeyName.trim()}
+                      className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                    >
+                      {keyCreating ? "Generating..." : "Generate"}
+                    </button>
+                  </div>
+                  {keyError && (
+                    <p className="mt-2 text-xs text-red-600">{keyError}</p>
+                  )}
+                </div>
+              )}
 
               {collections.length > 0 && (
-                <div className="bg-green-50 rounded-xl p-4 border border-green-200 mb-4">
-                  <p className="text-sm font-medium text-green-800 mb-2">
+                <div className="bg-emerald-50/60 border border-emerald-200 rounded-md p-3 mb-4">
+                  <p className="text-sm font-medium text-emerald-900 mb-1.5 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     Native collections ready
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {collections.map((c) => (
                       <span
                         key={c.id}
-                        className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full"
+                        className="text-xs bg-white border border-emerald-200 text-emerald-700 px-2 py-0.5 rounded font-mono"
                       >
                         {c.name}
                       </span>
@@ -513,9 +570,11 @@ export function OnboardingPage() {
 
               <button
                 onClick={handleFinish}
-                className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                className="w-full bg-gray-900 text-white py-3 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
               >
-                Go to my workspace
+                {firstKeyRaw
+                  ? "Done — go to my workspace"
+                  : "Skip key for now — go to my workspace"}
               </button>
             </div>
           )}

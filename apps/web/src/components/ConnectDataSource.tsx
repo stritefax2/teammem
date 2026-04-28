@@ -90,91 +90,93 @@ export function ConnectDataSource({
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-900/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900">
-            Connect a Postgres database
-          </h2>
+    <div className="fixed inset-0 bg-gray-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl ring-1 ring-gray-200 shadow-2xl shadow-gray-900/10 max-w-lg w-full overflow-hidden max-h-[calc(100vh-2rem)] flex flex-col">
+        {/* Header */}
+        <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between bg-white">
+          <div className="flex items-center gap-2.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <h2 className="text-sm font-semibold text-gray-900">
+              Connect a Postgres database
+            </h2>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded">
+              read-only
+            </span>
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            className="text-gray-400 hover:text-gray-700 text-xl leading-none"
+            aria-label="Close"
           >
             &times;
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6">
+
+        <form
+          id="connect-data-source-form"
+          onSubmit={handleSubmit}
+          className="p-5 overflow-y-auto"
+        >
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
               {error}
             </div>
           )}
 
           {privilegeError && (
-            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm">
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-sm">
               <p className="font-medium text-amber-900">
                 That role has too many privileges.
               </p>
-              <p className="text-xs text-amber-800 mt-1">
+              <p className="text-xs text-amber-800 mt-1 leading-relaxed">
                 TeamMem refuses to connect as a superuser or a role that can
                 create accounts or bypass RLS. Provision a dedicated
                 read-only role (SQL below) and use its credentials instead.
               </p>
-              <ul className="mt-2 text-xs text-amber-800 space-y-0.5 list-disc list-inside">
+              <ul className="mt-2 text-xs text-amber-800 space-y-0.5 list-disc list-inside font-mono">
                 {privilegeError.privileges.rolsuper && (
-                  <li>
-                    <code className="bg-white/60 px-1 rounded">SUPERUSER</code>
-                  </li>
+                  <li>SUPERUSER</li>
                 )}
                 {privilegeError.privileges.rolcreaterole && (
-                  <li>
-                    <code className="bg-white/60 px-1 rounded">CREATEROLE</code>
-                  </li>
+                  <li>CREATEROLE</li>
                 )}
                 {privilegeError.privileges.rolcreatedb && (
-                  <li>
-                    <code className="bg-white/60 px-1 rounded">CREATEDB</code>
-                  </li>
+                  <li>CREATEDB</li>
                 )}
                 {privilegeError.privileges.rolbypassrls && (
-                  <li>
-                    <code className="bg-white/60 px-1 rounded">BYPASSRLS</code>
-                  </li>
+                  <li>BYPASSRLS</li>
                 )}
               </ul>
             </div>
           )}
 
-          {/* Role-creation SQL is first-class, not buried in a "details"
-              toggle — for the evaluator, this is the single most useful
-              thing on the page. */}
-          <div className="mb-5 rounded-xl border border-blue-100 bg-blue-50/70 p-3">
-            <div className="flex items-start justify-between gap-3 mb-2">
+          {/* Role-creation SQL — first-class, not hidden behind a toggle */}
+          <div className="mb-5 rounded-md border border-gray-200 bg-gray-50 overflow-hidden">
+            <div className="flex items-start justify-between gap-3 px-3 py-2.5 border-b border-gray-200">
               <div>
-                <p className="text-sm font-semibold text-blue-900">
+                <p className="text-sm font-semibold text-gray-900">
                   Create a read-only role first
                 </p>
-                <p className="text-xs text-blue-800 mt-0.5">
+                <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">
                   Run this in your DB and use the new user's credentials
-                  below. TeamMem will refuse superuser / CREATEROLE /
-                  CREATEDB / BYPASSRLS roles.
+                  below.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={copyRoleSql}
-                className="shrink-0 text-xs bg-white text-blue-700 border border-blue-200 px-2.5 py-1 rounded-lg font-medium hover:bg-blue-50"
+                className="shrink-0 text-[11px] font-medium bg-white text-gray-900 border border-gray-200 px-2.5 py-1 rounded-md hover:border-gray-300"
               >
                 {sqlCopied ? "Copied" : "Copy SQL"}
               </button>
             </div>
-            <pre className="bg-white rounded-lg border border-blue-100 p-2.5 overflow-x-auto text-[11px] leading-snug text-gray-800 font-mono">
+            <pre className="bg-gray-950 text-emerald-300 p-3 overflow-x-auto text-[11px] leading-snug font-mono">
 {ROLE_SQL}
             </pre>
           </div>
 
           <label className="block mb-4">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-xs font-medium text-gray-700">
               Connection name
             </span>
             <input
@@ -183,7 +185,7 @@ export function ConnectDataSource({
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="e.g. Supabase Prod, Analytics DB"
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
             />
             <span className="block mt-1 text-xs text-gray-500">
               Just a label — pick something memorable.
@@ -191,7 +193,7 @@ export function ConnectDataSource({
           </label>
 
           <label className="block mb-3">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-xs font-medium text-gray-700">
               Connection string
             </span>
             <textarea
@@ -200,22 +202,22 @@ export function ConnectDataSource({
               required
               rows={3}
               placeholder="postgres://teammem_readonly:password@db.example.com:5432/prod?sslmode=require"
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-y"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none resize-y"
             />
-            <span className="block mt-1 text-xs text-gray-500">
-              Encrypted at rest with AES-GCM. Never returned to the browser
-              or any agent.
+            <span className="block mt-1 text-xs text-gray-500 leading-relaxed">
+              AES-GCM encrypted at rest. Never returned to the browser or
+              any agent.
             </span>
           </label>
 
-          <details className="mb-4 bg-gray-50 rounded-lg border border-gray-200 group">
+          <details className="mb-4 bg-white rounded-md border border-gray-200 group">
             <summary className="cursor-pointer select-none px-3 py-2 text-xs font-medium text-gray-700 hover:text-gray-900 list-none flex items-center justify-between">
               <span>Where to find this connection string</span>
               <span className="text-gray-400 group-open:rotate-180 transition-transform">
                 ▾
               </span>
             </summary>
-            <div className="px-3 py-3 border-t border-gray-200 space-y-3 text-xs text-gray-700">
+            <div className="px-3 py-3 border-t border-gray-200 space-y-3 text-xs text-gray-700 bg-gray-50/50">
               <div>
                 <p className="font-semibold text-gray-900">Supabase</p>
                 <ol className="mt-1 space-y-0.5 list-decimal list-inside text-gray-600">
@@ -225,14 +227,15 @@ export function ConnectDataSource({
                     <span className="font-medium">Database</span>
                   </li>
                   <li>
-                    Under <span className="font-medium">Connection string</span>
-                    , pick <span className="font-medium">URI</span> and copy
+                    Under{" "}
+                    <span className="font-medium">Connection string</span>,
+                    pick <span className="font-medium">URI</span> and copy
                     the <span className="font-medium">Session pooler</span>{" "}
                     string
                   </li>
                   <li>
                     Swap in the password for the{" "}
-                    <code className="bg-white px-1 rounded">
+                    <code className="bg-white border border-gray-200 px-1 rounded font-mono">
                       teammem_readonly
                     </code>{" "}
                     role you created above
@@ -248,8 +251,12 @@ export function ConnectDataSource({
                     <span className="font-medium">Connection Details</span>
                   </li>
                   <li>
-                    Copy the <span className="font-medium">Connection string</span>
-                    , keep <code className="bg-white px-1 rounded">?sslmode=require</code>{" "}
+                    Copy the{" "}
+                    <span className="font-medium">Connection string</span>,
+                    keep{" "}
+                    <code className="bg-white border border-gray-200 px-1 rounded font-mono">
+                      ?sslmode=require
+                    </code>{" "}
                     on the end
                   </li>
                 </ol>
@@ -257,42 +264,47 @@ export function ConnectDataSource({
             </div>
           </details>
 
-          <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
-            <p className="text-xs font-medium text-blue-900">
-              What happens when you click Connect
+          <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mb-4">
+            <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">
+              On click → Connect
             </p>
-            <ol className="mt-1.5 text-xs text-blue-800 space-y-0.5 list-decimal list-inside">
-              <li>We run <code>SELECT 1</code> to verify the connection.</li>
+            <ol className="text-xs text-gray-700 space-y-0.5 list-decimal list-inside leading-relaxed">
               <li>
-                We check the role's privileges and refuse superuser /
-                CREATEROLE / CREATEDB / BYPASSRLS.
+                We run{" "}
+                <code className="bg-white border border-gray-200 px-1 rounded font-mono">
+                  SELECT 1
+                </code>{" "}
+                to verify the connection.
               </li>
-              <li>Your connection string is AES-GCM encrypted and stored.</li>
               <li>
-                You pick which tables to expose as collections, one at a
-                time.
+                Privileges checked — superuser / CREATEROLE / CREATEDB /
+                BYPASSRLS roles are refused.
               </li>
+              <li>Connection string AES-GCM encrypted, then stored.</li>
+              <li>You pick which tables to expose as collections.</li>
               <li>Agents never see the raw connection string.</li>
             </ol>
           </div>
-
-          <div className="flex gap-2 justify-end">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting || !name.trim() || !connectionString.trim()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {submitting ? "Testing connection..." : "Connect"}
-            </button>
-          </div>
         </form>
+
+        {/* Footer with actions — sticky at bottom of modal */}
+        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex items-center justify-end gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="connect-data-source-form"
+            disabled={submitting || !name.trim() || !connectionString.trim()}
+            className="bg-gray-900 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+          >
+            {submitting ? "Testing connection…" : "Connect"}
+          </button>
+        </div>
       </div>
     </div>
   );

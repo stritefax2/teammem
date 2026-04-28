@@ -168,7 +168,7 @@ export function ConnectedCollectionSetup({
                         key={qualified}
                         onClick={() => pickTable(t)}
                         disabled={!pk}
-                        className="w-full flex items-center justify-between text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
+                        className="w-full flex items-center justify-between text-left px-4 py-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
                         title={
                           !pk
                             ? "This table has no primary key and can't be synced yet."
@@ -187,7 +187,7 @@ export function ConnectedCollectionSetup({
                           </p>
                         </div>
                         {pk && (
-                          <span className="text-xs text-blue-600 font-medium">
+                          <span className="text-xs text-gray-900 font-medium">
                             Select →
                           </span>
                         )}
@@ -217,7 +217,7 @@ export function ConnectedCollectionSetup({
                   type="text"
                   value={collectionName}
                   onChange={(e) => setCollectionName(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                 />
               </label>
 
@@ -228,7 +228,7 @@ export function ConnectedCollectionSetup({
                 <select
                   value={primaryKey}
                   onChange={(e) => setPrimaryKey(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                 >
                   {selectedTable.columns
                     .filter((c) => !c.is_nullable)
@@ -258,7 +258,7 @@ export function ConnectedCollectionSetup({
                           new Set(selectedTable.columns.map((c) => c.name))
                         )
                       }
-                      className="text-blue-600 hover:underline"
+                      className="text-gray-900 hover:underline"
                     >
                       Select all
                     </button>
@@ -291,7 +291,7 @@ export function ConnectedCollectionSetup({
                         {col.data_type}
                       </span>
                       {col.name === primaryKey && (
-                        <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                        <span className="text-[10px] bg-gray-100 text-gray-900 px-1.5 py-0.5 rounded-full">
                           PK
                         </span>
                       )}
@@ -308,7 +308,7 @@ export function ConnectedCollectionSetup({
                 <select
                   value={contentCol}
                   onChange={(e) => setContentCol(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                 >
                   <option value="">None — structured data only</option>
                   {selectedTable.columns
@@ -352,7 +352,7 @@ export function ConnectedCollectionSetup({
                     !primaryKey ||
                     selectedCols.size === 0
                   }
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
                 >
                   {submitting ? "Creating..." : "Create & sync"}
                 </button>

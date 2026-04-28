@@ -1,0 +1,209 @@
+import { useState } from "react";
+
+export const API_URL_FOR_AGENTS =
+  (import.meta.env.VITE_API_URL as string | undefined)?.trim() ||
+  (typeof window !== "undefined" &&
+  window.location.origin.includes("localhost")
+    ? "http://localhost:3001"
+    : "");
+
+export function NewKeyPanel({
+  rawKey,
+  workspaceId,
+  onDismiss,
+}: {
+  rawKey: string;
+  workspaceId: string;
+  onDismiss?: () => void;
+}) {
+  const [tool, setTool] = useState<"claude" | "cursor" | "other">("claude");
+  const [copied, setCopied] = useState(false);
+
+  function copy(text: string) {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
+  const config = `{
+  "mcpServers": {
+    "teammem": {
+      "command": "npx",
+      "args": ["-y", "teammem-mcp"],
+      "env": {
+        "TEAMMEM_API_KEY": "${rawKey}",
+        "TEAMMEM_WORKSPACE": "${workspaceId}"${
+          API_URL_FOR_AGENTS
+            ? `,
+        "TEAMMEM_API_URL": "${API_URL_FOR_AGENTS}"`
+            : ""
+        }
+      }
+    }
+  }
+}`;
+
+  return (
+    <div className="bg-white rounded-xl ring-1 ring-emerald-200 overflow-hidden">
+      {/* Banner */}
+      <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-emerald-100 bg-emerald-50/60">
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-700">
+            key created — copy it now, it won't be shown again
+          </span>
+        </div>
+        {onDismiss && (
+          <button
+            onClick={onDismiss}
+            className="text-emerald-700/60 hover:text-emerald-900 text-base leading-none"
+            aria-label="Dismiss"
+          >
+            &times;
+          </button>
+        )}
+      </div>
+
+      {/* Raw key */}
+      <div className="px-4 py-3">
+        <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">
+          API key
+        </p>
+        <div className="flex items-center gap-2">
+          <code className="flex-1 bg-gray-950 text-emerald-300 px-3 py-2 rounded-md text-sm font-mono select-all break-all">
+            {rawKey}
+          </code>
+          <button
+            onClick={() => copy(rawKey)}
+            className="bg-gray-900 text-white text-xs font-medium px-3 py-2 rounded-md hover:bg-gray-800 transition-colors shrink-0"
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+      </div>
+
+      {/* Tool tabs */}
+      <div className="border-t border-gray-100">
+        <div className="flex gap-px bg-gray-100 px-4 pt-3">
+          {(
+            [
+              { id: "claude", label: "Claude Desktop" },
+              { id: "cursor", label: "Cursor" },
+              { id: "other", label: "Other MCP tool" },
+            ] as const
+          ).map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTool(t.id)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-t-md transition-colors ${
+                tool === t.id
+                  ? "bg-white text-gray-900 border-x border-t border-gray-200"
+                  : "bg-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab body */}
+        <div className="px-4 py-4">
+          {tool === "claude" && (
+            <ol className="text-xs text-gray-600 space-y-1.5 mb-3 leading-relaxed">
+              <li>
+                <span className="text-gray-400 font-mono mr-1.5">1.</span>
+                Open Claude Desktop →{" "}
+                <span className="font-medium text-gray-900">Settings</span> →{" "}
+                <span className="font-medium text-gray-900">Developer</span> →{" "}
+                <span className="font-medium text-gray-900">Edit Config</span>
+              </li>
+              <li>
+                <span className="text-gray-400 font-mono mr-1.5">2.</span>
+                Paste the config below and save
+              </li>
+              <li>
+                <span className="text-gray-400 font-mono mr-1.5">3.</span>
+                Restart Claude Desktop
+              </li>
+            </ol>
+          )}
+          {tool === "cursor" && (
+            <ol className="text-xs text-gray-600 space-y-1.5 mb-3 leading-relaxed">
+              <li>
+                <span className="text-gray-400 font-mono mr-1.5">1.</span>
+                Create{" "}
+                <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
+                  .cursor/mcp.json
+                </code>{" "}
+                in your project root
+              </li>
+              <li>
+                <span className="text-gray-400 font-mono mr-1.5">2.</span>
+                Paste the config below and save
+              </li>
+              <li>
+                <span className="text-gray-400 font-mono mr-1.5">3.</span>
+                Open Cursor → Settings → MCP — verify{" "}
+                <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
+                  teammem
+                </code>{" "}
+                shows as connected
+              </li>
+            </ol>
+          )}
+          {tool === "other" && (
+            <p className="text-xs text-gray-600 mb-3 leading-relaxed">
+              Any MCP-compatible tool can connect using the same JSON config —
+              or set these as environment variables directly.
+            </p>
+          )}
+
+          {tool !== "other" ? (
+            <div className="bg-gray-950 rounded-md ring-1 ring-gray-900 overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-800 bg-gray-900/60">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500">
+                  mcp.config.json
+                </span>
+                <button
+                  onClick={() => copy(config)}
+                  className="text-[10px] font-mono uppercase tracking-wider text-gray-400 hover:text-gray-200"
+                >
+                  {copied ? "copied" : "copy"}
+                </button>
+              </div>
+              <pre className="text-[11px] text-gray-300 overflow-x-auto leading-relaxed p-3">
+                {config}
+              </pre>
+            </div>
+          ) : (
+            <div className="bg-gray-950 rounded-md ring-1 ring-gray-900 overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-800 bg-gray-900/60">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500">
+                  environment variables
+                </span>
+              </div>
+              <div className="px-3 py-3 space-y-1 text-[12px] font-mono">
+                <div>
+                  <span className="text-gray-500">TEAMMEM_API_KEY=</span>
+                  <span className="text-emerald-300 break-all">{rawKey}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">TEAMMEM_WORKSPACE=</span>
+                  <span className="text-gray-300 break-all">{workspaceId}</span>
+                </div>
+                {API_URL_FOR_AGENTS && (
+                  <div>
+                    <span className="text-gray-500">TEAMMEM_API_URL=</span>
+                    <span className="text-gray-300 break-all">
+                      {API_URL_FOR_AGENTS}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

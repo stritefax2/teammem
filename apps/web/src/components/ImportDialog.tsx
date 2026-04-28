@@ -107,14 +107,14 @@ export function ImportDialog({ collectionId, onDone, onClose }: Props) {
             <button
               type="button"
               onClick={() => setMode("csv")}
-              className={`px-3 py-1.5 text-sm rounded-lg ${mode === "csv" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-500 hover:bg-gray-100"}`}
+              className={`px-3 py-1.5 text-sm rounded-lg ${mode === "csv" ? "bg-gray-100 text-gray-900 font-medium" : "text-gray-500 hover:bg-gray-100"}`}
             >
               CSV
             </button>
             <button
               type="button"
               onClick={() => setMode("json")}
-              className={`px-3 py-1.5 text-sm rounded-lg ${mode === "json" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-500 hover:bg-gray-100"}`}
+              className={`px-3 py-1.5 text-sm rounded-lg ${mode === "json" ? "bg-gray-100 text-gray-900 font-medium" : "text-gray-500 hover:bg-gray-100"}`}
             >
               JSON
             </button>
@@ -129,7 +129,7 @@ export function ImportDialog({ collectionId, onDone, onClose }: Props) {
               accept={mode === "csv" ? ".csv" : ".json"}
               ref={fileInputRef}
               onChange={handleFile}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-900 hover:file:bg-gray-100"
             />
           </div>
 
@@ -142,7 +142,7 @@ export function ImportDialog({ collectionId, onDone, onClose }: Props) {
                 ? 'name,email,role\nAlice,alice@co.com,engineer\nBob,bob@co.com,designer'
                 : '[{"name":"Alice","role":"engineer"},{"name":"Bob","role":"designer"}]'
             }
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-y"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none resize-y"
           />
 
           {result && (
@@ -166,7 +166,7 @@ export function ImportDialog({ collectionId, onDone, onClose }: Props) {
             <button
               type="submit"
               disabled={importing || !rawText.trim()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
             >
               {importing
                 ? "Importing..."

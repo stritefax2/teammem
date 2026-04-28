@@ -71,7 +71,7 @@ export function LoginPage() {
               </div>
             )}
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
                 {error}
               </div>
             )}
@@ -83,7 +83,7 @@ export function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@company.com"
-                className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2.5 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
               />
             </label>
             <label className="block mb-2">
@@ -93,7 +93,7 @@ export function LoginPage() {
                 </span>
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-blue-600 hover:underline"
+                  className="text-xs text-gray-900 hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -103,13 +103,13 @@ export function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2.5 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
               />
             </label>
             <button
               type="submit"
               disabled={loading}
-              className="mt-4 w-full bg-gray-900 text-white py-2.5 rounded-xl font-medium text-sm hover:bg-gray-800 disabled:opacity-50 transition-colors"
+              className="mt-4 w-full bg-gray-900 text-white py-2.5 rounded-md font-medium text-sm hover:bg-gray-800 disabled:opacity-50 transition-colors"
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
@@ -118,7 +118,7 @@ export function LoginPage() {
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="text-blue-600 font-medium hover:underline"
+              className="text-gray-900 font-medium hover:underline"
             >
               Get started free
             </Link>

@@ -171,11 +171,11 @@ export function EntryPage() {
 
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           {isSynced && collectionInfo?.source_config && (
-            <div className="px-6 py-2.5 bg-blue-50/50 border-b border-blue-100 flex items-center gap-3 text-xs">
-              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+            <div className="px-6 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-3 text-xs">
+              <span className="text-xs bg-gray-100 text-gray-900 px-2 py-0.5 rounded-full font-medium">
                 Read-only
               </span>
-              <span className="text-blue-900">
+              <span className="text-gray-900">
                 Synced from{" "}
                 <code className="bg-white/80 px-1.5 py-0.5 rounded text-xs font-mono">
                   {collectionInfo.source_config.table}
@@ -199,8 +199,8 @@ export function EntryPage() {
               {isSynced ? (
                 <span className="text-gray-500">From connected source</span>
               ) : entry.created_by_agent ? (
-                <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
-                  <span className="w-3 h-3 rounded-full bg-purple-200 flex items-center justify-center text-[8px] font-bold">
+                <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
+                  <span className="w-3 h-3 rounded-full bg-gray-200 flex items-center justify-center text-[8px] font-bold">
                     A
                   </span>
                   Created by agent
@@ -215,14 +215,14 @@ export function EntryPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowVersions(!showVersions)}
-                className="text-xs text-blue-600 hover:underline"
+                className="text-xs text-gray-900 hover:underline"
               >
                 History ({versions.length})
               </button>
               {!isSynced && !editing && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-medium hover:bg-blue-700"
+                  className="bg-gray-900 text-white px-3 py-1 rounded-lg text-xs font-medium hover:bg-gray-800"
                 >
                   Edit
                 </button>
@@ -261,7 +261,7 @@ export function EntryPage() {
                               [key]: e.target.value,
                             }))
                           }
-                          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                         />
                       ) : (
                         <p className="mt-1 text-sm text-gray-900">
@@ -275,7 +275,7 @@ export function EntryPage() {
                   <button
                     type="button"
                     onClick={addField}
-                    className="mt-3 text-xs text-blue-600 hover:underline"
+                    className="mt-3 text-xs text-gray-900 hover:underline"
                   >
                     + Add field
                   </button>
@@ -312,7 +312,7 @@ export function EntryPage() {
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
                       rows={14}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-y font-mono"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none resize-y font-mono"
                       placeholder="Write here... Markdown is supported."
                     />
                   )}
@@ -331,7 +331,7 @@ export function EntryPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
                 >
                   {saving ? "Saving..." : "Save changes"}
                 </button>
@@ -388,7 +388,7 @@ export function EntryPage() {
                           v.change_type === "create"
                             ? "bg-green-100 text-green-700"
                             : v.change_type === "update"
-                              ? "bg-blue-100 text-blue-700"
+                              ? "bg-gray-100 text-gray-900"
                               : "bg-red-100 text-red-700"
                         }`}
                       >
@@ -399,7 +399,7 @@ export function EntryPage() {
                       </span>
                       <span className="text-xs text-gray-600 flex items-center gap-1">
                         {actor.type === "agent" && (
-                          <span className="w-3 h-3 rounded-full bg-purple-200 text-purple-600 flex items-center justify-center text-[8px] font-bold">
+                          <span className="w-3 h-3 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-[8px] font-bold">
                             A
                           </span>
                         )}

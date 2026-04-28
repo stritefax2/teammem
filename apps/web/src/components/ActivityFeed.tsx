@@ -14,18 +14,27 @@ interface AuditEvent {
   agent_name: string | null;
 }
 
-export function ActivityFeed({ workspaceId }: { workspaceId: string }) {
+export function ActivityFeed({
+  workspaceId,
+  limit = 20,
+  refreshKey = 0,
+}: {
+  workspaceId: string;
+  limit?: number;
+  refreshKey?: number;
+}) {
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     apiFetch<{ events: AuditEvent[] }>(
-      `/api/v1/audit/${workspaceId}?limit=20`
+      `/api/v1/audit/${workspaceId}?limit=${limit}`
     )
       .then((data) => setEvents(data.events))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [workspaceId]);
+  }, [workspaceId, limit, refreshKey]);
 
   if (loading) {
     return (
@@ -65,7 +74,7 @@ export function ActivityFeed({ workspaceId }: { workspaceId: string }) {
             className="flex items-start gap-2 text-xs text-gray-600"
           >
             {actor.isAgent ? (
-              <span className="w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5">
+              <span className="w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5">
                 A
               </span>
             ) : (

@@ -66,7 +66,7 @@ export function AppShell({
           <div className="flex items-center gap-2 text-sm shrink-0">
             <Link
               to="/dashboard"
-              className="font-bold text-gray-900 hover:text-blue-600 transition-colors"
+              className="font-bold text-gray-900 hover:text-gray-900 transition-colors"
             >
               TeamMem
             </Link>
@@ -102,8 +102,8 @@ export function AppShell({
                   setSearchQuery(e.target.value);
                   if (!e.target.value) clearSearch();
                 }}
-                placeholder="Search your knowledge base..."
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-1.5 pl-8 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white outline-none transition-colors"
+                placeholder="Search collections, entries, synced data..."
+                className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 pl-8 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 focus:bg-white outline-none transition-colors"
               />
               <svg
                 className="absolute left-2.5 top-2 w-3.5 h-3.5 text-gray-400"
@@ -146,7 +146,7 @@ export function AppShell({
                           className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
                         >
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-medium text-blue-600">
+                            <span className="text-xs font-medium text-gray-900">
                               {r.collection}
                             </span>
                             <span className="text-xs text-gray-400">
@@ -182,7 +182,7 @@ export function AppShell({
             {workspaceId && (
               <Link
                 to={`/w/${workspaceId}/settings`}
-                className={`text-sm transition-colors ${location.pathname.includes("/settings") ? "text-blue-600" : "text-gray-500 hover:text-gray-700"}`}
+                className={`text-sm transition-colors ${location.pathname.includes("/settings") ? "text-gray-900" : "text-gray-500 hover:text-gray-700"}`}
               >
                 Settings
               </Link>

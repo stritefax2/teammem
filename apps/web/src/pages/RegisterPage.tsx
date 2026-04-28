@@ -3,6 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth.js";
 import { SocialAuth } from "../components/SocialAuth.js";
 
+// Persist the "check your inbox" state across reloads. When a user opens the
+// confirmation email on a different device, the original tab might get
+// reloaded — without this the form would re-render empty and they'd panic.
+const PENDING_EMAIL_KEY = "teammem.register.pendingEmail";
+
 export function RegisterPage() {
   const { register, resendConfirmation } = useAuth();
   const navigate = useNavigate();
@@ -11,11 +16,25 @@ export function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmailState] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem(PENDING_EMAIL_KEY);
+  });
   const [resendState, setResendState] = useState<
     "idle" | "sending" | "sent" | "error"
   >("idle");
   const [resendError, setResendError] = useState("");
+
+  // Wrap the setter so localStorage and React state stay in sync.
+  function setPendingEmail(value: string | null) {
+    setPendingEmailState(value);
+    if (typeof window === "undefined") return;
+    if (value) {
+      window.localStorage.setItem(PENDING_EMAIL_KEY, value);
+    } else {
+      window.localStorage.removeItem(PENDING_EMAIL_KEY);
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -24,14 +43,14 @@ export function RegisterPage() {
     try {
       const result = await register(email, password, name || undefined);
       if (result.needsEmailConfirmation) {
-        // Stay on this page and show a "check your inbox" state. When the
-        // user clicks the email link, Supabase bounces them back to
-        // SITE_URL (which we set to http://localhost:5173 in dev), the
-        // Supabase JS client parses the hash, a session appears, and the
-        // HomePage protected route sends them on to /dashboard.
+        // Stay on this page and show a "check your inbox" state. The pending
+        // email is persisted to localStorage so a reload doesn't strand the
+        // user on an empty form, and so opening the email on another device
+        // doesn't make this tab forget what it was waiting on.
         setPendingEmail(email);
       } else {
         // Email confirmation disabled — go straight in.
+        setPendingEmail(null);
         navigate("/dashboard");
       }
     } catch (err: any) {
@@ -75,9 +94,9 @@ export function RegisterPage() {
           {pendingEmail ? (
             <>
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 mb-3">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 border border-gray-200 mb-3">
                   <svg
-                    className="w-6 h-6 text-blue-600"
+                    className="w-6 h-6 text-gray-700"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -102,23 +121,24 @@ export function RegisterPage() {
                 </p>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-600 space-y-2">
+              <div className="bg-gray-50 border border-gray-200 rounded-md p-4 text-xs text-gray-600 space-y-2">
                 <p>
-                  <span className="font-medium text-gray-800">
-                    Tip:
-                  </span>{" "}
-                  open the link on this device so you go straight to the
-                  app. The link expires in 24 hours.
+                  <span className="font-medium text-gray-800">Tip:</span> if
+                  you click the link on a different device, just come back
+                  to this page once you're confirmed —{" "}
+                  <Link to="/login" className="text-gray-900 underline underline-offset-2 decoration-gray-300">
+                    sign in
+                  </Link>
+                  {" "}with the same email and you're in. The link expires
+                  in 24 hours.
                 </p>
-                <p>
-                  Didn't arrive? Check spam, or resend below.
-                </p>
+                <p>Didn't arrive? Check spam, or resend below.</p>
               </div>
 
               <button
                 onClick={handleResend}
                 disabled={resendState === "sending"}
-                className="mt-4 w-full border border-gray-300 text-gray-700 py-2.5 rounded-xl font-medium text-sm hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                className="mt-4 w-full border border-gray-300 text-gray-700 py-2.5 rounded-md font-medium text-sm hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
                 {resendState === "sending"
                   ? "Resending..."
@@ -148,7 +168,7 @@ export function RegisterPage() {
                 Already confirmed?{" "}
                 <Link
                   to="/login"
-                  className="text-blue-600 font-medium hover:underline"
+                  className="text-gray-900 font-medium hover:underline"
                 >
                   Sign in
                 </Link>
@@ -178,7 +198,7 @@ export function RegisterPage() {
 
               <form onSubmit={handleSubmit}>
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
                     {error}
                   </div>
                 )}
@@ -191,7 +211,7 @@ export function RegisterPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your name"
-                    className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2.5 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                   />
                 </label>
                 <label className="block mb-4">
@@ -204,7 +224,7 @@ export function RegisterPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="you@company.com"
-                    className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2.5 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                   />
                 </label>
                 <label className="block mb-6">
@@ -218,13 +238,13 @@ export function RegisterPage() {
                     required
                     minLength={8}
                     placeholder="Min 8 characters"
-                    className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2.5 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                   />
                 </label>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gray-900 text-white py-2.5 rounded-xl font-medium text-sm hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                  className="w-full bg-gray-900 text-white py-2.5 rounded-md font-medium text-sm hover:bg-gray-800 disabled:opacity-50 transition-colors"
                 >
                   {loading ? "Creating account..." : "Create account"}
                 </button>
@@ -233,7 +253,7 @@ export function RegisterPage() {
                 Already have an account?{" "}
                 <Link
                   to="/login"
-                  className="text-blue-600 font-medium hover:underline"
+                  className="text-gray-900 font-medium hover:underline"
                 >
                   Sign in
                 </Link>

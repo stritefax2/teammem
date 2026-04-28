@@ -115,26 +115,25 @@ export function WorkspacePage() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {/* Solo user invite nudge */}
         {memberCount === 1 && !dismissedNudge && (
-          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-4">
+          <div className="mb-6 bg-white border border-gray-200 rounded-xl p-4 flex items-start gap-4">
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-900">
+              <p className="text-sm font-medium text-gray-900">
                 You're the only one here
               </p>
-              <p className="text-xs text-blue-700 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 Invite teammates so their AI tools share this knowledge too.
-                The more agents connected, the smarter everyone's AI gets.
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Link
                 to={`/w/${id}/settings`}
-                className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
+                className="bg-gray-900 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-gray-800 transition-colors"
               >
                 Invite team
               </Link>
               <button
                 onClick={() => setDismissedNudge(true)}
-                className="text-blue-400 hover:text-blue-600 text-lg leading-none"
+                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
               >
                 &times;
               </button>
@@ -146,7 +145,7 @@ export function WorkspacePage() {
           <h2 className="text-lg font-semibold text-gray-800">Collections</h2>
           <button
             onClick={() => setShowCreate(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
           >
             New collection
           </button>
@@ -172,7 +171,7 @@ export function WorkspacePage() {
                     setNewName(tpl.name);
                     setNewType(tpl.type);
                   }}
-                  className="text-left p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-sm"
+                  className="text-left p-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all text-sm"
                 >
                   <span className="text-lg">{tpl.icon}</span>
                   <p className="font-medium text-gray-800 mt-1">{tpl.name}</p>
@@ -195,7 +194,7 @@ export function WorkspacePage() {
                   onChange={(e) => setNewName(e.target.value)}
                   required
                   placeholder="Collection name"
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                 />
               </label>
               <label>
@@ -205,7 +204,7 @@ export function WorkspacePage() {
                 <select
                   value={newType}
                   onChange={(e) => setNewType(e.target.value)}
-                  className="mt-1 block rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                  className="mt-1 block rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                 >
                   <option value="documents">Documents</option>
                   <option value="structured">Structured</option>
@@ -214,7 +213,7 @@ export function WorkspacePage() {
               </label>
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800"
               >
                 Create
               </button>
@@ -230,63 +229,102 @@ export function WorkspacePage() {
         )}
 
         {collections.length === 0 ? (
-          <div className="py-12">
-            <div className="max-w-xl mx-auto text-center">
-              <p className="text-sm text-gray-500 mb-6">
-                No collections yet. Start with sample data, or create one
-                from scratch.
-              </p>
-              <div className="grid sm:grid-cols-2 gap-3">
+          <div className="py-6">
+            <div className="max-w-3xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">
+                  Connect your team's data
+                </h2>
+                <p className="mt-2 text-sm text-gray-500 max-w-lg mx-auto leading-relaxed">
+                  Once a source is connected, every AI tool on your team
+                  gets scoped, audited reads — column redaction included.
+                </p>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-3">
+                {/* Primary: Connect Postgres */}
+                <Link
+                  to={`/w/${id}/settings?tab=sources`}
+                  className="sm:col-span-2 text-left bg-gray-950 text-white rounded-xl p-6 ring-1 ring-gray-900 hover:ring-emerald-500/40 transition-all group relative overflow-hidden"
+                >
+                  <div
+                    className="absolute inset-0 opacity-[0.4] pointer-events-none"
+                    aria-hidden="true"
+                    style={{
+                      backgroundImage:
+                        "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
+                      backgroundSize: "20px 20px",
+                    }}
+                  />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400">
+                        Recommended
+                      </span>
+                    </div>
+                    <p className="text-base font-semibold">
+                      Connect a Postgres database
+                    </p>
+                    <p className="text-sm text-gray-400 mt-1.5 leading-relaxed">
+                      Read-only sync from Supabase, Neon, or RDS. Pick
+                      which tables and columns each agent can see.
+                    </p>
+                    <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500 font-mono">
+                      <span>read-only</span>
+                      <span className="text-gray-700">·</span>
+                      <span>per-agent column redaction</span>
+                      <span className="text-gray-700">·</span>
+                      <span>full audit trail</span>
+                    </div>
+                    <p className="mt-5 inline-flex items-center gap-1.5 text-sm text-emerald-400 font-medium group-hover:gap-2.5 transition-all">
+                      Connect database →
+                    </p>
+                  </div>
+                </Link>
+
+                {/* Secondary: Sample data */}
                 <button
                   onClick={handleSeedDemo}
                   disabled={seedingDemo}
-                  className="text-left bg-white rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-colors p-5 disabled:opacity-60 disabled:cursor-wait"
+                  className="text-left bg-white border border-gray-200 hover:border-gray-300 rounded-xl p-6 transition-colors disabled:opacity-60 disabled:cursor-wait"
                 >
-                  <p className="text-sm font-semibold text-gray-900">
-                    Try with sample data
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-3">
+                    No DB? Try the demo
                   </p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                    Seeds a fake{" "}
-                    <code className="bg-gray-100 px-1 rounded">
+                  <p className="text-base font-semibold text-gray-900">
+                    Sample data
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
+                    Seeds{" "}
+                    <code className="text-xs bg-gray-100 px-1 rounded">
                       demo_customers
                     </code>{" "}
-                    collection with 15 rows. Create a scoped agent key,
-                    redact <code className="bg-gray-100 px-1 rounded">ssn_fake</code>,
-                    paste the MCP config into Cursor or Claude, and ask a
-                    question. ~60 seconds end-to-end.
+                    with 15 rows. ~60 seconds end-to-end.
                   </p>
-                  <p className="text-xs text-blue-600 mt-3 font-medium">
-                    {seedingDemo ? "Seeding…" : "Seed demo collection →"}
-                  </p>
-                </button>
-                <button
-                  onClick={() => setShowCreate(true)}
-                  className="text-left bg-white rounded-xl border border-gray-200 hover:border-gray-400 transition-colors p-5"
-                >
-                  <p className="text-sm font-semibold text-gray-900">
-                    Create an empty collection
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                    Start from a template or a blank native collection.
-                    You'll add data via upload, import, or from an agent.
-                  </p>
-                  <p className="text-xs text-blue-600 mt-3 font-medium">
-                    Pick a template →
+                  <p className="mt-5 inline-flex items-center gap-1.5 text-sm text-gray-900 font-medium">
+                    {seedingDemo ? "Seeding…" : "Seed demo →"}
                   </p>
                 </button>
               </div>
-              <p className="text-xs text-gray-400 mt-6">
-                Or connect a Postgres source from{" "}
-                <Link
-                  to={`/w/${id}/settings?tab=sources`}
-                  className="text-blue-600 hover:underline"
+
+              <p className="mt-6 text-center text-xs text-gray-500">
+                Or{" "}
+                <button
+                  type="button"
+                  onClick={() => setShowCreate(true)}
+                  className="text-gray-700 hover:text-gray-900 underline underline-offset-2 decoration-gray-300"
                 >
-                  Settings → Data Sources
-                </Link>
-                .
+                  create an empty collection
+                </button>{" "}
+                from a template — upload docs, import CSVs, or have an
+                agent write to it.
               </p>
+
               {seedError && (
-                <p className="text-xs text-red-600 mt-3">{seedError}</p>
+                <p className="text-xs text-red-600 mt-3 text-center">
+                  {seedError}
+                </p>
               )}
             </div>
           </div>
@@ -296,14 +334,14 @@ export function WorkspacePage() {
               <Link
                 key={col.id}
                 to={`/w/${id}/c/${col.id}`}
-                className="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
+                className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all"
               >
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-medium text-gray-900 truncate">
                     {col.name}
                   </h3>
                   {col.source_id && (
-                    <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">
+                    <span className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">
                       synced
                     </span>
                   )}
@@ -324,54 +362,77 @@ export function WorkspacePage() {
           </div>
         )}
 
-        {/* Getting started tips — show when workspace has little data */}
+        {/* Next steps panel — show when workspace has little activity */}
         {collections.length > 0 &&
           collections.reduce((s, c) => s + c.entry_count, 0) < 5 && (
-            <div className="mt-8 bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-              <h3 className="text-sm font-semibold text-gray-800 mb-3">
-                Start building your knowledge base
+            <div className="mt-8 bg-white rounded-xl border border-gray-200 p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                Next steps
               </h3>
               <p className="text-xs text-gray-500 mb-4">
-                The more you add, the smarter everyone's AI gets. Here are
-                the fastest ways to get started:
+                Connect a real source, give an AI tool a key, and you're done.
               </p>
               <div className="grid sm:grid-cols-2 gap-3">
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-blue-800 mb-1">
-                    Tell your AI to save things
+                <Link
+                  to={`/w/${id}/settings?tab=sources`}
+                  className="bg-gray-50 hover:bg-white hover:border-gray-300 border border-gray-100 rounded-md p-3 transition-all group"
+                >
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
+                    Step 1
                   </p>
-                  <p className="text-xs text-blue-700">
-                    After any conversation: "Save the key takeaways to
-                    TeamMem." Your AI handles the rest.
+                  <p className="text-xs font-semibold text-gray-900 mb-1">
+                    Connect a Postgres source
                   </p>
-                </div>
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-blue-800 mb-1">
-                    Upload existing docs
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Read-only sync from Supabase, Neon, RDS. Pick which
+                    tables and columns each agent can read.
                   </p>
-                  <p className="text-xs text-blue-700">
-                    Open a collection → Upload docs. Drop in meeting notes,
-                    specs, or reports. They're instantly searchable.
+                </Link>
+                <Link
+                  to={`/w/${id}/settings?tab=agents`}
+                  className="bg-gray-50 hover:bg-white hover:border-gray-300 border border-gray-100 rounded-md p-3 transition-all group"
+                >
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
+                    Step 2
                   </p>
-                </div>
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-blue-800 mb-1">
-                    Let agents write for you
+                  <p className="text-xs font-semibold text-gray-900 mb-1">
+                    Generate an agent key
                   </p>
-                  <p className="text-xs text-blue-700">
-                    "Read this file and store it in our research collection."
-                    Your AI reads, chunks, and indexes it.
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    One per AI tool. Each gets its own scope — table access,
+                    column redaction, rate limits.
                   </p>
-                </div>
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-blue-800 mb-1">
-                    Import structured data
+                </Link>
+                <Link
+                  to={`/w/${id}/settings?tab=members`}
+                  className="bg-gray-50 hover:bg-white hover:border-gray-300 border border-gray-100 rounded-md p-3 transition-all group"
+                >
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
+                    Step 3
                   </p>
-                  <p className="text-xs text-blue-700">
-                    Open a collection → Import CSV. Paste a spreadsheet and
-                    every row becomes a searchable entry.
+                  <p className="text-xs font-semibold text-gray-900 mb-1">
+                    Invite teammates
                   </p>
-                </div>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    They reuse the same connected sources without sharing
+                    DB credentials. Each has their own scoped keys.
+                  </p>
+                </Link>
+                <Link
+                  to={`/w/${id}/settings?tab=audit`}
+                  className="bg-gray-50 hover:bg-white hover:border-gray-300 border border-gray-100 rounded-md p-3 transition-all group"
+                >
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
+                    Anytime
+                  </p>
+                  <p className="text-xs font-semibold text-gray-900 mb-1">
+                    View the audit log
+                  </p>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Every read, every write, every agent — with row IDs and
+                    timestamps. Compliance-ready from day one.
+                  </p>
+                </Link>
               </div>
             </div>
           )}

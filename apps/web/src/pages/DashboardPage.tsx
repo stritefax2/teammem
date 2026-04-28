@@ -88,7 +88,7 @@ export function DashboardPage() {
           <h2 className="text-lg font-semibold text-gray-800">Workspaces</h2>
           <button
             onClick={() => setShowCreate(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
           >
             New workspace
           </button>
@@ -110,12 +110,12 @@ export function DashboardPage() {
                 required
                 autoFocus
                 placeholder="e.g. Acme Corp, Product Team"
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
               />
             </label>
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+              className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800"
             >
               Create
             </button>
@@ -134,14 +134,14 @@ export function DashboardPage() {
             <Link
               key={ws.id}
               to={`/w/${ws.id}`}
-              className="block bg-white p-5 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all group"
+              className="block bg-white p-5 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all group"
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                <h3 className="font-medium text-gray-900 group-hover:text-gray-900 transition-colors">
                   {ws.name}
                 </h3>
                 <svg
-                  className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors"
+                  className="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

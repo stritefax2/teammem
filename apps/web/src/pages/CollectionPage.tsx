@@ -260,18 +260,18 @@ export function CollectionPage() {
     >
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {isConnected && collection.source_config && (
-          <div className="mb-4 bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="mb-4 bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-blue-900 flex items-center gap-2">
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+              <p className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                <span className="text-xs bg-gray-100 text-gray-900 px-2 py-0.5 rounded-full font-medium">
                   Read-only
                 </span>
                 Synced from{" "}
-                <code className="bg-white/80 text-blue-900 px-1.5 py-0.5 rounded text-xs font-mono">
+                <code className="bg-white/80 text-gray-900 px-1.5 py-0.5 rounded text-xs font-mono">
                   {collection.source_config.table}
                 </code>
               </p>
-              <p className="text-xs text-blue-700 mt-0.5">
+              <p className="text-xs text-gray-900 mt-0.5">
                 {collection.last_sync_at
                   ? `Last synced ${new Date(collection.last_sync_at).toLocaleString()}`
                   : "Awaiting first sync"}
@@ -288,7 +288,7 @@ export function CollectionPage() {
             <button
               onClick={handleSyncNow}
               disabled={syncing || collection.sync_status === "syncing"}
-              className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-700 disabled:opacity-60 transition-colors shrink-0"
+              className="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 disabled:opacity-60 transition-colors shrink-0"
             >
               {syncing || collection.sync_status === "syncing"
                 ? "Syncing..."
@@ -317,7 +317,7 @@ export function CollectionPage() {
               placeholder="Filter entries..."
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
             />
           </div>
           {!isConnected && (
@@ -336,7 +336,7 @@ export function CollectionPage() {
               </button>
               <button
                 onClick={() => setShowCreate(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
               >
                 + Add entry
               </button>
@@ -364,7 +364,7 @@ export function CollectionPage() {
                       onChange={(e) =>
                         setNewFields((f) => ({ ...f, [col]: e.target.value }))
                       }
-                      className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                      className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                     />
                   </label>
                 ))}
@@ -382,13 +382,13 @@ export function CollectionPage() {
                 onChange={(e) => setNewContent(e.target.value)}
                 rows={6}
                 placeholder="Write your entry here... Markdown is supported."
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-y font-mono"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none resize-y font-mono"
               />
             </label>
             <div className="flex gap-2 mt-4">
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800"
               >
                 Create entry
               </button>
@@ -412,9 +412,9 @@ export function CollectionPage() {
         ) : filtered.length === 0 && !filterText ? (
           /* Empty state */
           <div className="text-center py-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
               <svg
-                className="w-8 h-8 text-blue-500"
+                className="w-8 h-8 text-gray-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -446,7 +446,7 @@ export function CollectionPage() {
                   disabled={
                     syncing || collection.sync_status === "syncing"
                   }
-                  className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-60 transition-colors"
+                  className="bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-60 transition-colors"
                 >
                   {syncing || collection.sync_status === "syncing"
                     ? "Syncing..."
@@ -467,7 +467,7 @@ export function CollectionPage() {
                 </p>
                 <button
                   onClick={() => setShowCreate(true)}
-                  className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                  className="bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
                 >
                   + Add first entry
                 </button>
@@ -493,7 +493,7 @@ export function CollectionPage() {
                         <span className="inline-flex items-center gap-1">
                           {col}
                           {sortCol === col && (
-                            <span className="text-blue-500">
+                            <span className="text-gray-700">
                               {sortDir === "asc" ? "↑" : "↓"}
                             </span>
                           )}
@@ -515,7 +515,7 @@ export function CollectionPage() {
                       <span className="inline-flex items-center gap-1">
                         Updated
                         {!sortCol && (
-                          <span className="text-blue-500">
+                          <span className="text-gray-700">
                             {sortDir === "asc" ? "↑" : "↓"}
                           </span>
                         )}
@@ -533,7 +533,7 @@ export function CollectionPage() {
                           `/w/${workspaceId}/c/${collectionId}/entry/${entry.id}`
                         )
                       }
-                      className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors cursor-pointer group"
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group"
                     >
                       {columns.map((col) => (
                         <td
@@ -554,7 +554,7 @@ export function CollectionPage() {
                         <div className="flex items-center gap-1.5">
                           {entry.created_by_agent && (
                             <span
-                              className="w-4 h-4 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-[9px] font-bold shrink-0"
+                              className="w-4 h-4 rounded-full bg-gray-900 text-white flex items-center justify-center text-[9px] font-bold shrink-0"
                               title="Created by AI agent"
                             >
                               A
@@ -567,7 +567,7 @@ export function CollectionPage() {
                       </td>
                       <td className="px-2 py-3">
                         <svg
-                          className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors"
+                          className="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -625,11 +625,11 @@ export function CollectionPage() {
                     `/w/${workspaceId}/c/${collectionId}/entry/${entry.id}`
                   )
                 }
-                className="bg-white p-5 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer group"
+                className="bg-white p-5 rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group"
               >
                 {/* Title if present */}
                 {typeof entry.structured_data?.title === "string" && (
-                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-gray-900 transition-colors">
                     {entry.structured_data.title}
                   </h3>
                 )}
@@ -665,8 +665,8 @@ export function CollectionPage() {
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                   <div className="flex items-center gap-2">
                     {entry.created_by_agent ? (
-                      <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
-                        <span className="w-3 h-3 rounded-full bg-purple-200 flex items-center justify-center text-[8px] font-bold">
+                      <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
+                        <span className="w-3 h-3 rounded-full bg-gray-200 flex items-center justify-center text-[8px] font-bold">
                           A
                         </span>
                         Agent
@@ -682,7 +682,7 @@ export function CollectionPage() {
                     </span>
                   </div>
                   <svg
-                    className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors"
+                    className="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

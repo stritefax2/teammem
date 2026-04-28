@@ -276,7 +276,7 @@ export function AcceptInvitePage() {
           <p className="text-sm text-red-600 mb-4">{error}</p>
           <Link
             to="/dashboard"
-            className="text-blue-600 text-sm font-medium hover:underline"
+            className="text-gray-900 text-sm font-medium hover:underline"
           >
             Go to dashboard
           </Link>
@@ -336,9 +336,9 @@ export function AcceptInvitePage() {
 
         {/* ─── Password setup (invited users only) ─── */}
         {showPasswordSetup && !passwordSaved && (
-          <div className="mb-5 bg-white rounded-2xl border border-blue-200 shadow-sm p-5">
+          <div className="mb-5 bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
             <div className="flex items-start gap-3">
-              <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold shrink-0">
+              <span className="w-8 h-8 rounded-full bg-gray-100 text-gray-900 flex items-center justify-center text-sm font-bold shrink-0">
                 1
               </span>
               <div className="flex-1 min-w-0">
@@ -356,7 +356,7 @@ export function AcceptInvitePage() {
                     required
                     minLength={8}
                     placeholder="New password (min 8 chars)"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                   />
                   <input
                     type="password"
@@ -365,7 +365,7 @@ export function AcceptInvitePage() {
                     required
                     minLength={8}
                     placeholder="Confirm password"
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                   />
                   {passwordError && (
                     <p className="text-xs text-red-600">{passwordError}</p>
@@ -377,7 +377,7 @@ export function AcceptInvitePage() {
                       !passwordValue ||
                       !passwordConfirm
                     }
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                    className="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
                   >
                     {passwordSubmitting ? "Saving..." : "Save password"}
                   </button>
@@ -410,9 +410,9 @@ export function AcceptInvitePage() {
 
         {/* ─── PRIMARY ACTION: Connect your AI ─── */}
         <div className="mb-5 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 bg-gradient-to-br from-blue-50 to-violet-50 border-b border-gray-200">
+          <div className="px-5 py-4 bg-gray-50 border-b border-gray-200">
             <div className="flex items-start gap-3">
-              <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
+              <span className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-bold shrink-0">
                 {showPasswordSetup && !passwordSaved ? "2" : "1"}
               </span>
               <div>
@@ -456,7 +456,7 @@ export function AcceptInvitePage() {
                 <button
                   onClick={handleGenerateKey}
                   disabled={generating}
-                  className="w-full bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="w-full bg-gray-900 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 disabled:opacity-50 transition-colors"
                 >
                   {generating
                     ? "Generating..."
@@ -510,7 +510,7 @@ export function AcceptInvitePage() {
                     </span>
                     <button
                       onClick={() => copy("config", mcpConfig || "")}
-                      className="text-xs text-blue-600 hover:underline font-medium"
+                      className="text-xs text-gray-900 hover:underline font-medium"
                     >
                       {copyState.config ? "Copied!" : "Copy config"}
                     </button>
@@ -563,7 +563,7 @@ export function AcceptInvitePage() {
                           <span className="text-gray-500">
                             TEAMMEM_WORKSPACE=
                           </span>
-                          <span className="text-blue-700">{workspaceId}</span>
+                          <span className="text-gray-900">{workspaceId}</span>
                         </div>
                         <div>
                           <span className="text-gray-500">TEAMMEM_API_URL=</span>
@@ -684,7 +684,7 @@ export function AcceptInvitePage() {
                           {c.name}
                         </span>
                         {synced ? (
-                          <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">
+                          <span className="text-[10px] bg-gray-100 text-gray-900 px-1.5 py-0.5 rounded-full font-medium shrink-0">
                             read-only · synced
                           </span>
                         ) : (

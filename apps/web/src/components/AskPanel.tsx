@@ -108,7 +108,7 @@ export function AskPanel({
                 <button
                   key={s}
                   onClick={() => setInput(s)}
-                  className="block w-full text-left text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition-colors"
+                  className="block w-full text-left text-sm text-gray-900 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
                 >
                   {s}
                 </button>
@@ -127,7 +127,7 @@ export function AskPanel({
             <div
               className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
                 msg.role === "user"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-gray-900 text-white"
                   : "bg-gray-100 text-gray-800"
               }`}
             >
@@ -140,7 +140,7 @@ export function AskPanel({
                       className="bg-white rounded-lg p-3 border border-gray-200"
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-medium text-blue-600">
+                        <span className="text-xs font-medium text-gray-900">
                           {r.collection}
                         </span>
                         <span className="text-xs text-gray-400">
@@ -197,12 +197,12 @@ export function AskPanel({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask anything about your workspace..."
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
           >
             Ask
           </button>

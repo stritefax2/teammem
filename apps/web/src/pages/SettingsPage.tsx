@@ -5,6 +5,8 @@ import { apiFetch } from "../lib/api.js";
 import { AppShell } from "../components/AppShell.js";
 import { ConnectDataSource } from "../components/ConnectDataSource.js";
 import { ConnectedCollectionSetup } from "../components/ConnectedCollectionSetup.js";
+import { ActivityFeed } from "../components/ActivityFeed.js";
+import { NewKeyPanel } from "../components/NewKeyPanel.js";
 
 interface Member {
   id: string;
@@ -59,7 +61,7 @@ type ColPerms = {
   deny_fields: Set<string>;
 };
 
-type Tab = "members" | "agents" | "sources";
+type Tab = "members" | "agents" | "sources" | "audit";
 
 function formatRelative(iso: string | null): string {
   if (!iso) return "never";
@@ -112,7 +114,7 @@ export function SettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") as Tab) || "members";
   const [tab, setTabState] = useState<Tab>(
-    ["members", "agents", "sources"].includes(initialTab)
+    ["members", "agents", "sources", "audit"].includes(initialTab)
       ? initialTab
       : "members"
   );
@@ -322,49 +324,42 @@ export function SettingsPage() {
     >
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {fromOnboarding && tab === "sources" && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-            <p className="text-sm font-medium text-blue-900">
-              Last step: connect a data source
-            </p>
-            <p className="text-xs text-blue-700 mt-1">
-              Add a Postgres connection here. Your agents get scoped,
-              audited read access to the tables you pick.
-            </p>
+          <div className="mb-6 p-4 bg-white border border-gray-200 rounded-md flex items-start gap-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                Last step — connect a data source
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Add a Postgres connection. Your agents get scoped, audited
+                read access to the tables you pick.
+              </p>
+            </div>
           </div>
         )}
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 border-b border-gray-200">
-          <button
-            onClick={() => setTab("sources")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              tab === "sources"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Data Sources
-          </button>
-          <button
-            onClick={() => setTab("agents")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              tab === "agents"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Agent Keys
-          </button>
-          <button
-            onClick={() => setTab("members")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              tab === "members"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            Members
-          </button>
+          {(
+            [
+              { id: "sources", label: "Data Sources" },
+              { id: "agents", label: "Agent Keys" },
+              { id: "members", label: "Members" },
+              { id: "audit", label: "Audit Log" },
+            ] as const
+          ).map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                tab === t.id
+                  ? "border-gray-900 text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
         {tab === "sources" && (
@@ -377,17 +372,17 @@ export function SettingsPage() {
               </p>
               <button
                 onClick={() => setShowConnectSource(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shrink-0"
+                className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors shrink-0"
               >
                 Connect Postgres
               </button>
             </div>
 
             {dataSources.length === 0 ? (
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 mb-3">
+              <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 border border-gray-200 mb-3">
                   <svg
-                    className="w-6 h-6 text-blue-500"
+                    className="w-5 h-5 text-gray-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -404,12 +399,12 @@ export function SettingsPage() {
                   No data sources yet
                 </h3>
                 <p className="text-sm text-gray-500 max-w-md mx-auto mb-4">
-                  Connect a Postgres database to let your agents read from
-                  it through scoped collections.
+                  Connect a Postgres database to let your agents read from it
+                  through scoped collections.
                 </p>
                 <button
                   onClick={() => setShowConnectSource(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
                 >
                   Connect your first database
                 </button>
@@ -439,19 +434,19 @@ export function SettingsPage() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
+                        className={`text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border ${
                           ds.status === "active"
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : ds.status === "error"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-gray-100 text-gray-600"
+                              ? "bg-red-50 text-red-700 border-red-200"
+                              : "bg-gray-50 text-gray-500 border-gray-200"
                         }`}
                       >
                         {ds.status}
                       </span>
                       <button
                         onClick={() => setSetupFromSource(ds)}
-                        className="text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 px-2.5 py-1 rounded-lg font-medium"
+                        className="text-xs bg-white border border-gray-200 text-gray-800 hover:border-gray-300 px-2.5 py-1 rounded-md font-medium"
                       >
                         Add collection
                       </button>
@@ -500,13 +495,19 @@ export function SettingsPage() {
 
         {tab === "members" && (
           <div>
+            <p className="text-sm text-gray-600 mb-4 max-w-2xl leading-relaxed">
+              Invite teammates so their AI tools can read the same connected
+              data and shared collections. Each member can generate their
+              own scoped agent keys — your DB credentials are never shared.
+            </p>
+
             {/* Invite form */}
             <form
               onSubmit={handleInvite}
-              className="flex gap-3 items-end mb-4"
+              className="flex flex-col sm:flex-row gap-3 sm:items-end mb-4 bg-white border border-gray-200 rounded-md p-4"
             >
               <label className="flex-1">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-xs font-medium text-gray-700">
                   Invite by email
                 </span>
                 <input
@@ -515,15 +516,15 @@ export function SettingsPage() {
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="teammate@company.com"
                   required
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                 />
               </label>
               <label>
-                <span className="text-sm font-medium text-gray-700">Role</span>
+                <span className="text-xs font-medium text-gray-700">Role</span>
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value)}
-                  className="mt-1 block rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                  className="mt-1 block w-full sm:w-auto rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                 >
                   <option value="editor">Editor</option>
                   <option value="viewer">Viewer</option>
@@ -532,19 +533,20 @@ export function SettingsPage() {
               </label>
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+                className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
               >
-                Invite
+                Send invite
               </button>
             </form>
 
             {inviteError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
                 {inviteError}
               </div>
             )}
             {inviteSuccess && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
+              <div className="mb-4 p-3 bg-emerald-50/60 border border-emerald-200 text-emerald-800 rounded-md text-sm flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 {inviteSuccess}
               </div>
             )}
@@ -621,143 +623,17 @@ export function SettingsPage() {
         {tab === "agents" && (
           <div>
             {newRawKey && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-                <p className="text-sm font-medium text-green-800 mb-2">
-                  Agent key created! Copy it now — it won't be shown again.
-                </p>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-white px-3 py-2 rounded-lg border border-green-200 text-sm font-mono text-green-900 select-all break-all">
-                    {newRawKey}
-                  </code>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(newRawKey)}
-                    className="text-sm text-green-700 hover:underline shrink-0"
-                  >
-                    Copy
-                  </button>
-                </div>
-                {/* Step-by-step setup per tool */}
-                <div className="mt-4 space-y-3">
-                  <div className="bg-white rounded-xl border border-green-200 overflow-hidden">
-                    <div className="px-4 py-2.5 bg-green-50 border-b border-green-200">
-                      <p className="text-sm font-medium text-green-900">
-                        Claude Desktop
-                      </p>
-                    </div>
-                    <div className="px-4 py-3">
-                      <ol className="text-xs text-gray-600 space-y-1.5 mb-3">
-                        <li>
-                          1. Open Claude Desktop &rarr;{" "}
-                          <span className="font-medium text-gray-800">
-                            Settings
-                          </span>{" "}
-                          &rarr;{" "}
-                          <span className="font-medium text-gray-800">
-                            Developer
-                          </span>{" "}
-                          &rarr;{" "}
-                          <span className="font-medium text-gray-800">
-                            Edit Config
-                          </span>
-                        </li>
-                        <li>2. Paste the config below and save</li>
-                        <li>3. Restart Claude Desktop</li>
-                      </ol>
-                      <pre className="text-xs text-gray-800 bg-gray-50 rounded-lg p-3 overflow-x-auto">{`{
-  "mcpServers": {
-    "teammem": {
-      "command": "npx",
-      "args": ["-y", "teammem-mcp"],
-      "env": {
-        "TEAMMEM_API_KEY": "${newRawKey}",
-        "TEAMMEM_WORKSPACE": "${id}"
-      }
-    }
-  }
-}`}</pre>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-xl border border-green-200 overflow-hidden">
-                    <div className="px-4 py-2.5 bg-green-50 border-b border-green-200">
-                      <p className="text-sm font-medium text-green-900">
-                        Cursor
-                      </p>
-                    </div>
-                    <div className="px-4 py-3">
-                      <ol className="text-xs text-gray-600 space-y-1.5 mb-3">
-                        <li>
-                          1. Create{" "}
-                          <code className="bg-gray-100 px-1 rounded text-gray-800">
-                            .cursor/mcp.json
-                          </code>{" "}
-                          in your project root
-                        </li>
-                        <li>2. Paste the config below and save</li>
-                        <li>
-                          3. Open Cursor Settings &rarr; MCP &rarr; verify
-                          "teammem" shows as connected
-                        </li>
-                      </ol>
-                      <pre className="text-xs text-gray-800 bg-gray-50 rounded-lg p-3 overflow-x-auto">{`{
-  "mcpServers": {
-    "teammem": {
-      "command": "npx",
-      "args": ["-y", "teammem-mcp"],
-      "env": {
-        "TEAMMEM_API_KEY": "${newRawKey}",
-        "TEAMMEM_WORKSPACE": "${id}"
-      }
-    }
-  }
-}`}</pre>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                    <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-200">
-                      <p className="text-sm font-medium text-gray-700">
-                        Other MCP tools
-                      </p>
-                    </div>
-                    <div className="px-4 py-3">
-                      <p className="text-xs text-gray-600 mb-2">
-                        Any MCP-compatible tool can connect using these
-                        environment variables:
-                      </p>
-                      <div className="bg-gray-50 rounded-lg p-3 space-y-1 text-xs font-mono">
-                        <div>
-                          <span className="text-gray-500">TEAMMEM_API_KEY=</span>
-                          <span className="text-green-700">{newRawKey}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">TEAMMEM_WORKSPACE=</span>
-                          <span className="text-blue-700">{id}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">TEAMMEM_API_URL=</span>
-                          <span className="text-gray-700">
-                            {window.location.origin.includes("localhost")
-                              ? "http://localhost:3001"
-                              : window.location.origin.replace("://", "://api.")}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setNewRawKey("")}
-                  className="mt-3 text-xs text-green-700 hover:underline"
-                >
-                  Dismiss
-                </button>
+              <div className="mb-6">
+                <NewKeyPanel
+                  rawKey={newRawKey}
+                  workspaceId={id ?? ""}
+                  onDismiss={() => setNewRawKey("")}
+                />
               </div>
             )}
 
             <div className="flex items-center justify-between mb-4 gap-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 max-w-2xl leading-relaxed">
                 Agent keys let AI tools read your connected data and read/write
                 native collections via MCP. Each key has its own scope — table
                 access, column redaction, rate limits — enforced at the API
@@ -765,7 +641,7 @@ export function SettingsPage() {
               </p>
               <button
                 onClick={() => setShowKeyForm(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shrink-0"
+                className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors shrink-0"
               >
                 New agent key
               </button>
@@ -774,10 +650,10 @@ export function SettingsPage() {
             {showKeyForm && (
               <form
                 onSubmit={handleCreateKey}
-                className="mb-6 bg-white p-4 rounded-xl border border-gray-200 shadow-sm"
+                className="mb-6 bg-white p-5 rounded-md border border-gray-200"
               >
                 <label className="block mb-3">
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-xs font-medium text-gray-700">
                     Key name
                   </span>
                   <input
@@ -786,11 +662,11 @@ export function SettingsPage() {
                     onChange={(e) => setKeyName(e.target.value)}
                     placeholder="e.g. Claude Desktop, Cursor, CI Bot"
                     required
-                    className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                   />
                 </label>
                 <label className="block mb-4">
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-xs font-medium text-gray-700">
                     Access level
                   </span>
                   <select
@@ -798,7 +674,7 @@ export function SettingsPage() {
                     onChange={(e) =>
                       setKeyAccess(e.target.value as "all" | "scoped")
                     }
-                    className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                   >
                     <option value="all">
                       Full access — read all, write to native collections
@@ -807,7 +683,7 @@ export function SettingsPage() {
                       Scoped — pick tables and redact columns
                     </option>
                   </select>
-                  <span className="block mt-1.5 text-xs text-gray-500">
+                  <span className="block mt-1.5 text-xs text-gray-500 leading-relaxed">
                     Connected tables are always read-only to agents —
                     structural, not configurable. Writes only go to native
                     collections.
@@ -832,7 +708,7 @@ export function SettingsPage() {
                                     {col.name}
                                   </p>
                                   {isConnected && (
-                                    <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
+                                    <span className="text-[10px] font-mono uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded">
                                       synced
                                     </span>
                                   )}
@@ -905,7 +781,7 @@ export function SettingsPage() {
                               p.read &&
                               columnsForRedaction.length > 0 && (
                                 <details className="mt-2 group">
-                                  <summary className="text-xs text-blue-600 hover:underline cursor-pointer select-none list-none">
+                                  <summary className="text-xs text-gray-700 hover:text-gray-900 underline underline-offset-2 decoration-gray-300 cursor-pointer select-none list-none">
                                     Redact columns ({p.deny_fields.size}{" "}
                                     of {columnsForRedaction.length} hidden)
                                   </summary>
@@ -957,7 +833,7 @@ export function SettingsPage() {
                 <div className="flex gap-2">
                   <button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+                    className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
                   >
                     Create key
                   </button>
@@ -1060,7 +936,61 @@ export function SettingsPage() {
             </div>
           </div>
         )}
+
+        {tab === "audit" && id && <AuditPanel workspaceId={id} />}
       </main>
     </AppShell>
+  );
+}
+
+function AuditPanel({ workspaceId }: { workspaceId: string }) {
+  const [limit, setLimit] = useState<50 | 100 | 250>(100);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  return (
+    <div>
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <p className="text-sm text-gray-600 max-w-2xl leading-relaxed">
+          Every read, write, and delete by every actor — agent or human —
+          is recorded here with row IDs and timestamps. Compliance-ready
+          from day one.
+        </p>
+        <div className="flex items-center gap-2 shrink-0">
+          <select
+            value={limit}
+            onChange={(e) =>
+              setLimit(Number(e.target.value) as 50 | 100 | 250)
+            }
+            className="text-xs rounded-md border border-gray-300 bg-white px-2 py-1.5 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
+          >
+            <option value={50}>Last 50</option>
+            <option value={100}>Last 100</option>
+            <option value={250}>Last 250</option>
+          </select>
+          <button
+            onClick={() => setRefreshKey((k) => k + 1)}
+            className="text-xs bg-white border border-gray-200 hover:border-gray-300 text-gray-700 px-3 py-1.5 rounded-md font-medium"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-md p-5">
+        <ActivityFeed
+          workspaceId={workspaceId}
+          limit={limit}
+          refreshKey={refreshKey}
+        />
+      </div>
+
+      <p className="mt-3 text-xs text-gray-400 leading-relaxed">
+        For full export, query{" "}
+        <code className="bg-gray-100 border border-gray-200 text-gray-700 px-1.5 py-0.5 rounded font-mono">
+          GET /api/v1/audit/{workspaceId}
+        </code>{" "}
+        with an admin agent key.
+      </p>
+    </div>
   );
 }
