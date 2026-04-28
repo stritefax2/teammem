@@ -17,17 +17,56 @@ export interface SyncedRows {
   truncated: boolean;
 }
 
+// Decide what TLS config to pass to pg for a given connection string.
+// Two cases users actually hit:
+//
+// 1. Supabase pooler (`*.pooler.supabase.com`) presents a cert chain that
+//    Node's bundled CA store doesn't include — we get
+//    SELF_SIGNED_CERT_IN_CHAIN at handshake. We disable verification for
+//    those hosts. The connection is still encrypted; we just don't pin
+//    the issuer.
+// 2. The user explicitly opted into relaxed verification by setting
+//    `sslmode=no-verify` in the URL (libpq syntax, doesn't natively work
+//    with node-postgres but we accept it as a hint).
+//
+// Everything else uses pg's defaults — TLS is on if the URL says so,
+// off otherwise.
+function sslConfigFor(connectionString: string): boolean | { rejectUnauthorized: boolean } {
+  let url: URL;
+  try {
+    url = new URL(connectionString);
+  } catch {
+    return false;
+  }
+  const sslmode = url.searchParams.get("sslmode");
+  const isSupabasePooler =
+    /\.pooler\.supabase\.com$/i.test(url.hostname) ||
+    /\.supabase\.co$/i.test(url.hostname);
+
+  if (sslmode === "no-verify" || sslmode === "allow") {
+    return { rejectUnauthorized: false };
+  }
+  if (isSupabasePooler) {
+    return { rejectUnauthorized: false };
+  }
+  // Fall through to pg's defaults (true if sslmode=require/verify-*, else
+  // unset).
+  return false;
+}
+
 async function withClient<T>(
   connectionString: string,
   timeoutMs: number,
   fn: (client: pg.PoolClient) => Promise<T>
 ): Promise<T> {
+  const ssl = sslConfigFor(connectionString);
   const pool = new pg.Pool({
     connectionString,
     max: 1,
     idleTimeoutMillis: 1000,
     connectionTimeoutMillis: 5000,
     statement_timeout: timeoutMs,
+    ...(ssl ? { ssl } : {}),
   } as pg.PoolConfig);
   const client = await pool.connect();
   try {
