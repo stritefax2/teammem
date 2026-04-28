@@ -1,4 +1,89 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+
+// Brand SVG marks — Simple Icons (CC0). Use fill="currentColor" so tile color drives them.
+const BRAND_ICONS: Record<string, ReactNode> = {
+  postgres: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M23.5594 14.7228a.5269.5269 0 0 0-.0563-.1191c-.139-.2632-.4768-.3418-1.0074-.2321-1.6533.3411-2.2935.1312-2.5256-.0191 1.342-2.0482 2.445-4.522 3.0411-6.8297.2714-1.0507.7982-3.5237.1222-4.7316a1.5641 1.5641 0 0 0-.1509-.235C21.6931.9086 19.8007.0248 17.5099.0005c-1.4947-.0158-2.7705.3461-3.1161.4794a9.449 9.449 0 0 0-.5159-.0816 8.044 8.044 0 0 0-1.3114-.1278c-1.1822-.0184-2.2038.2642-3.0498.8406-.8573-.3211-4.7888-1.645-7.2219.0788C.9359 2.1526.3086 3.8733.4302 6.3043c.0409.818.5069 3.334 1.2423 5.7436.4598 1.5065.9387 2.7019 1.4334 3.582.553.9942 1.1259 1.5933 1.7143 1.7895.4474.1491 1.1327.1441 1.8581-.7279.8012-.9635 1.5903-1.8258 1.9446-2.2069.4351.2355.9064.3625 1.39.3772a.0569.0569 0 0 0 .0004.0041 11.0312 11.0312 0 0 0-.2472.3054c-.3389.4302-.4094.5197-1.5002.7443-.3102.064-1.1344.2339-1.1464.8115-.0025.1224.0329.2309.0919.3268.2269.4231.9216.6097 1.015.6331 1.3345.3335 2.5044.092 3.3714-.6787-.017 2.231.0775 4.4174.3454 5.0874.2212.5529.7618 1.9045 2.4692 1.9043.2505 0 .5263-.0291.8296-.0941 1.7819-.3821 2.5557-1.1696 2.855-2.9059.1503-.8707.4016-2.8753.5388-4.1012.0169-.0703.0357-.1207.057-.1362.0007-.0005.0697-.0471.4272.0307a.3673.3673 0 0 0 .0443.0068l.2539.0223.0149.001c.8468.0384 1.9114-.1426 2.5312-.4308.6438-.2988 1.8057-1.0323 1.5951-1.6698zM2.371 11.8765c-.7435-2.4358-1.1779-4.8851-1.2123-5.5719-.1086-2.1714.4171-3.6829 1.5623-4.4927 1.8367-1.2986 4.8398-.5408 6.108-.13-.0032.0032-.0066.0061-.0098.0094-2.0238 2.044-1.9758 5.536-1.9708 5.7495-.0002.0823.0066.1989.0162.3593.0348.5873.0996 1.6804-.0735 2.9184-.1609 1.1504.1937 2.2764.9728 3.0892.0806.0841.1648.1631.2518.2374-.3468.3714-1.1004 1.1926-1.9025 2.1576-.5677.6825-.9597.5517-1.0886.5087-.3919-.1307-.813-.5871-1.2381-1.3223-.4796-.839-.9635-2.0317-1.4155-3.5126zm6.0072 5.0871c-.1711-.0428-.3271-.1132-.4322-.1772.0889-.0394.2374-.0902.4833-.1409 1.2833-.2641 1.4815-.4506 1.9143-1.0002.0992-.126.2116-.2687.3673-.4426a.3549.3549 0 0 0 .0737-.1298c.1708-.1513.2724-.1099.4369-.0417.156.0646.3078.26.3695.4752.0291.1016.0619.2945-.0452.4444-.9043 1.2658-2.2216 1.2494-3.1676 1.0128zm2.094-3.988-.0525.141c-.133.3566-.2567.6881-.3334 1.003-.6674-.0021-1.3168-.2872-1.8105-.8024-.6279-.6551-.9131-1.5664-.7825-2.5004.1828-1.3079.1153-2.4468.079-3.0586-.005-.0857-.0095-.1607-.0122-.2199.2957-.2621 1.6659-.9962 2.6429-.7724.4459.1022.7176.4057.8305.928.5846 2.7038.0774 3.8307-.3302 4.7363-.084.1866-.1633.3629-.2311.5454zm7.3637 4.5725c-.0169.1768-.0358.376-.0618.5959l-.146.4383a.3547.3547 0 0 0-.0182.1077c-.0059.4747-.054.6489-.115.8693-.0634.2292-.1353.4891-.1794 1.0575-.11 1.4143-.8782 2.2267-2.4172 2.5565-1.5155.3251-1.7843-.4968-2.0212-1.2217a6.5824 6.5824 0 0 0-.0769-.2266c-.2154-.5858-.1911-1.4119-.1574-2.5551.0165-.5612-.0249-1.9013-.3302-2.6462.0044-.2932.0106-.5909.019-.8918a.3529.3529 0 0 0-.0153-.1126 1.4927 1.4927 0 0 0-.0439-.208c-.1226-.4283-.4213-.7866-.7797-.9351-.1424-.059-.4038-.1672-.7178-.0869.067-.276.1831-.5875.309-.9249l.0529-.142c.0595-.16.134-.3257.213-.5012.4265-.9476 1.0106-2.2453.3766-5.1772-.2374-1.0981-1.0304-1.6343-2.2324-1.5098-.7207.0746-1.3799.3654-1.7088.5321a5.6716 5.6716 0 0 0-.1958.1041c.0918-1.1064.4386-3.1741 1.7357-4.4823a4.0306 4.0306 0 0 1 .3033-.276.3532.3532 0 0 0 .1447-.0644c.7524-.5706 1.6945-.8506 2.802-.8325.4091.0067.8017.0339 1.1742.081 1.939.3544 3.2439 1.4468 4.0359 2.3827.8143.9623 1.2552 1.9315 1.4312 2.4543-1.3232-.1346-2.2234.1268-2.6797.779-.9926 1.4189.543 4.1729 1.2811 5.4964.1353.2426.2522.4522.2889.5413.2403.5825.5515.9713.7787 1.2552.0696.087.1372.1714.1885.245-.4008.1155-1.1208.3825-1.0552 1.717-.0123.1563-.0423.4469-.0834.8148-.0461.2077-.0702.4603-.0994.7662zm.8905-1.6211c-.0405-.8316.2691-.9185.5967-1.0105a2.8566 2.8566 0 0 0 .135-.0406 1.202 1.202 0 0 0 .1342.103c.5703.3765 1.5823.4213 3.0068.1344-.2016.1769-.5189.3994-.9533.6011-.4098.1903-1.0957.333-1.7473.3636-.7197.0336-1.0859-.0807-1.1721-.151zm.5695-9.2712c-.0059.3508-.0542.6692-.1054 1.0017-.055.3576-.112.7274-.1264 1.1762-.0142.4368.0404.8909.0932 1.3301.1066.887.216 1.8003-.2075 2.7014a3.5272 3.5272 0 0 1-.1876-.3856c-.0527-.1276-.1669-.3326-.3251-.6162-.6156-1.1041-2.0574-3.6896-1.3193-4.7446.3795-.5427 1.3408-.5661 2.1781-.463zm.2284 7.0137a12.3762 12.3762 0 0 0-.0853-.1074l-.0355-.0444c.7262-1.1995.5842-2.3862.4578-3.4385-.0519-.4318-.1009-.8396-.0885-1.2226.0129-.4061.0666-.7543.1185-1.0911.0639-.415.1288-.8443.1109-1.3505.0134-.0531.0188-.1158.0118-.1902-.0457-.4855-.5999-1.938-1.7294-3.253-.6076-.7073-1.4896-1.4972-2.6889-2.0395.5251-.1066 1.2328-.2035 2.0244-.1859 2.0515.0456 3.6746.8135 4.8242 2.2824a.908.908 0 0 1 .0667.1002c.7231 1.3556-.2762 6.2751-2.9867 10.5405zm-8.8166-6.1162c-.025.1794-.3089.4225-.6211.4225a.5821.5821 0 0 1-.0809-.0056c-.1873-.026-.3765-.144-.5059-.3156-.0458-.0605-.1203-.178-.1055-.2844.0055-.0401.0261-.0985.0925-.1488.1182-.0894.3518-.1226.6096-.0867.3163.0441.6426.1938.6113.4186zm7.9305-.4114c.0111.0792-.049.201-.1531.3102-.0683.0717-.212.1961-.4079.2232a.5456.5456 0 0 1-.075.0052c-.2935 0-.5414-.2344-.5607-.3717-.024-.1765.2641-.3106.5611-.352.297-.0414.6111.0088.6356.1851z" />
+    </svg>
+  ),
+  sheets: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M11.318 12.545H7.91v-1.909h3.41v1.91zM14.728 0v6h6l-6-6zm1.363 10.636h-3.41v1.91h3.41v-1.91zm0 3.273h-3.41v1.91h3.41v-1.91zM20.727 6.5v15.864c0 .904-.732 1.636-1.636 1.636H4.909a1.636 1.636 0 0 1-1.636-1.636V1.636C3.273.732 4.005 0 4.909 0h9.318v6.5h6.5zm-3.273 2.773H6.545v7.909h10.91v-7.91zm-6.136 4.636H7.91v1.91h3.41v-1.91z" />
+    </svg>
+  ),
+  notion: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z" />
+    </svg>
+  ),
+  linear: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M2.886 4.18A11.982 11.982 0 0 1 11.99 0C18.624 0 24 5.376 24 12.009c0 3.64-1.62 6.903-4.18 9.105L2.887 4.18ZM1.817 5.626l16.556 16.556c-.524.33-1.075.62-1.65.866L.951 7.277c.247-.575.537-1.126.866-1.65ZM.322 9.163l14.515 14.515c-.71.172-1.443.282-2.195.322L0 11.358a12 12 0 0 1 .322-2.195Zm-.17 4.862 9.823 9.824a12.02 12.02 0 0 1-9.824-9.824Z" />
+    </svg>
+  ),
+  airtable: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M11.992 1.966c-.434 0-.87.086-1.28.257L1.779 5.917c-.503.208-.49.908.012 1.116l8.982 3.558a3.266 3.266 0 0 0 2.454 0l8.982-3.558c.503-.196.503-.908.012-1.116l-8.957-3.694a3.255 3.255 0 0 0-1.272-.257zM23.4 8.056a.589.589 0 0 0-.222.045l-10.012 3.877a.612.612 0 0 0-.38.564v8.896a.6.6 0 0 0 .821.552L23.62 18.1a.583.583 0 0 0 .38-.551V8.653a.6.6 0 0 0-.6-.596zM.676 8.095a.644.644 0 0 0-.48.19C.086 8.396 0 8.53 0 8.69v8.355c0 .442.515.737.908.54l6.27-3.006.307-.147 2.969-1.436c.466-.22.43-.908-.061-1.092L.883 8.138a.57.57 0 0 0-.207-.044z" />
+    </svg>
+  ),
+  mysql: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M16.405 5.501c-.115 0-.193.014-.274.033v.013h.014c.054.104.146.18.214.273.054.107.1.214.154.32l.014-.015c.094-.066.14-.172.14-.333-.04-.047-.046-.094-.08-.14-.04-.067-.126-.1-.18-.153zM5.77 18.695h-.927a50.854 50.854 0 00-.27-4.41h-.008l-1.41 4.41H2.45l-1.4-4.41h-.01a72.892 72.892 0 00-.195 4.41H0c.055-1.966.192-3.81.41-5.53h1.15l1.335 4.064h.008l1.347-4.064h1.095c.242 2.015.384 3.86.428 5.53zm4.017-4.08c-.378 2.045-.876 3.533-1.492 4.46-.482.716-1.01 1.073-1.583 1.073-.153 0-.34-.046-.566-.138v-.494c.11.017.24.026.386.026.268 0 .483-.075.647-.222.197-.18.295-.382.295-.605 0-.155-.077-.47-.23-.944L6.23 14.615h.91l.727 2.36c.164.536.233.91.205 1.123.4-1.064.678-2.227.835-3.483zm12.325 4.08h-2.63v-5.53h.885v4.85h1.745zm-3.32.135l-1.016-.5c.09-.076.177-.158.255-.25.433-.506.648-1.258.648-2.253 0-1.83-.718-2.746-2.155-2.746-.704 0-1.254.232-1.65.697-.43.508-.646 1.256-.646 2.245 0 .972.19 1.686.574 2.14.35.41.877.615 1.583.615.264 0 .506-.033.725-.098l1.325.772.36-.622zM15.5 17.588c-.225-.36-.337-.94-.337-1.736 0-1.393.424-2.09 1.27-2.09.443 0 .77.167.977.5.224.362.336.936.336 1.723 0 1.404-.424 2.108-1.27 2.108-.445 0-.77-.167-.978-.5zm-1.658-.425c0 .47-.172.856-.516 1.156-.344.3-.803.45-1.384.45-.543 0-1.064-.172-1.573-.515l.237-.476c.438.22.833.328 1.19.328.332 0 .593-.073.783-.22a.754.754 0 00.3-.615c0-.33-.23-.61-.648-.845-.388-.213-1.163-.657-1.163-.657-.422-.307-.632-.636-.632-1.177 0-.45.157-.81.47-1.085.315-.278.72-.415 1.22-.415.512 0 .98.136 1.4.41l-.213.476a2.726 2.726 0 00-1.064-.23c-.283 0-.502.068-.654.206a.685.685 0 00-.248.524c0 .328.234.61.666.85.393.215 1.187.67 1.187.67.433.305.648.63.648 1.168zm9.382-5.852c-.535-.014-.95.04-1.297.188-.1.04-.26.04-.274.167.055.053.063.14.11.214.08.134.218.313.346.407.14.11.28.216.427.31.26.16.555.255.81.416.145.094.293.213.44.313.073.05.12.14.214.172v-.02c-.046-.06-.06-.147-.105-.214-.067-.067-.134-.127-.2-.193a3.223 3.223 0 00-.695-.675c-.214-.146-.682-.35-.77-.595l-.013-.014c.146-.013.32-.066.46-.106.227-.06.435-.047.67-.106.106-.027.213-.06.32-.094v-.06c-.12-.12-.21-.283-.334-.395a8.867 8.867 0 00-1.104-.823c-.21-.134-.476-.22-.697-.334-.08-.04-.214-.06-.26-.127-.12-.146-.19-.34-.275-.514a17.69 17.69 0 01-.547-1.163c-.12-.262-.193-.523-.34-.763-.69-1.137-1.437-1.826-2.586-2.5-.247-.14-.543-.2-.856-.274-.167-.008-.334-.02-.5-.027-.11-.047-.216-.174-.31-.235-.38-.24-1.364-.76-1.644-.072-.18.434.267.862.422 1.082.115.153.26.328.34.5.047.116.06.235.107.356.106.294.207.622.347.897.073.14.153.287.247.413.054.073.146.107.167.227-.094.136-.1.334-.154.5-.24.757-.146 1.693.194 2.25.107.166.362.534.703.393.3-.12.234-.5.32-.835.02-.08.007-.133.048-.187v.015c.094.188.188.367.274.555.206.328.566.668.867.895.16.12.287.328.487.402v-.02h-.015c-.043-.058-.1-.086-.154-.133a3.445 3.445 0 01-.35-.4 8.76 8.76 0 01-.747-1.218c-.11-.21-.202-.436-.29-.643-.04-.08-.04-.2-.107-.24-.1.146-.247.273-.32.453-.127.288-.14.642-.188 1.01-.027.007-.014 0-.027.014-.214-.052-.287-.274-.367-.46-.2-.475-.233-1.238-.06-1.785.047-.14.247-.582.167-.716-.042-.127-.174-.2-.247-.303a2.478 2.478 0 01-.24-.427c-.16-.374-.24-.788-.414-1.162-.08-.173-.22-.354-.334-.513-.127-.18-.267-.307-.368-.52-.033-.073-.08-.194-.027-.274.014-.054.042-.075.094-.09.088-.072.335.022.422.062.247.1.455.194.662.334.094.066.195.193.315.226h.14c.214.047.455.014.655.073.355.114.675.28.962.46a5.953 5.953 0 012.085 2.286c.08.154.115.295.188.455.14.33.313.663.455.982.14.315.275.636.476.897.1.14.502.213.682.286.133.06.34.115.46.188.23.14.454.3.67.454.11.076.443.243.463.378z" />
+    </svg>
+  ),
+  bigquery: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M5.676 10.595h2.052v5.244a5.892 5.892 0 0 1-2.052-2.088v-3.156zm18.179 10.836a.504.504 0 0 1 0 .708l-1.716 1.716a.504.504 0 0 1-.708 0l-4.248-4.248a.206.206 0 0 1-.007-.007c-.02-.02-.028-.045-.043-.066a10.736 10.736 0 0 1-6.334 2.065C4.835 21.599 0 16.764 0 10.799S4.835 0 10.8 0s10.799 4.835 10.799 10.8c0 2.369-.772 4.553-2.066 6.333.025.017.052.028.074.05l4.248 4.248zm-5.028-10.632a8.015 8.015 0 1 0-8.028 8.028h.024a8.016 8.016 0 0 0 8.004-8.028zm-4.86 4.98a6.002 6.002 0 0 0 2.04-2.184v-1.764h-2.04v3.948zm-4.5.948c.442.057.887.08 1.332.072.4.025.8.025 1.2 0V7.692H9.468v9.035z" />
+    </svg>
+  ),
+  mcp: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path d="M13.85 0a4.16 4.16 0 0 0-2.95 1.217L1.456 10.66a.835.835 0 0 0 0 1.18.835.835 0 0 0 1.18 0l9.442-9.442a2.49 2.49 0 0 1 3.541 0 2.49 2.49 0 0 1 0 3.541L8.59 12.97l-.1.1a.835.835 0 0 0 0 1.18.835.835 0 0 0 1.18 0l.1-.098 7.03-7.034a2.49 2.49 0 0 1 3.542 0l.049.05a2.49 2.49 0 0 1 0 3.54l-8.54 8.54a1.96 1.96 0 0 0 0 2.755l1.753 1.753a.835.835 0 0 0 1.18 0 .835.835 0 0 0 0-1.18l-1.753-1.753a.266.266 0 0 1 0-.394l8.54-8.54a4.185 4.185 0 0 0 0-5.9l-.05-.05a4.16 4.16 0 0 0-2.95-1.218c-.2 0-.401.02-.6.048a4.17 4.17 0 0 0-1.17-3.552A4.16 4.16 0 0 0 13.85 0m0 3.333a.84.84 0 0 0-.59.245L6.275 10.56a4.186 4.186 0 0 0 0 5.902 4.186 4.186 0 0 0 5.902 0L19.16 9.48a.835.835 0 0 0 0-1.18.835.835 0 0 0-1.18 0l-6.985 6.984a2.49 2.49 0 0 1-3.54 0 2.49 2.49 0 0 1 0-3.54l6.983-6.985a.835.835 0 0 0 0-1.18.84.84 0 0 0-.59-.245" />
+    </svg>
+  ),
+};
 
 export function LandingPage() {
   return (
@@ -53,7 +138,7 @@ export function LandingPage() {
               <span className="absolute inset-0 rounded-full bg-blue-500 opacity-60 animate-ping" />
               <span className="relative w-1.5 h-1.5 rounded-full bg-blue-500" />
             </span>
-            Postgres connector in beta · Sheets &amp; Notion next
+            Postgres in beta · Sheets &amp; Notion next
           </div>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-[1.05]">
             Give every AI tool
@@ -64,11 +149,10 @@ export function LandingPage() {
             </span>
           </h1>
           <p className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Connect Postgres once. Claude, Cursor, ChatGPT, and every other
-            MCP-compatible tool on your team gets scoped, audited, column-level
-            redacted read access.{" "}
+            Connect Postgres once. Every MCP tool gets scoped, audited reads—
+            column redaction included.{" "}
             <span className="text-gray-900 font-medium">
-              No pasting schemas into chat. No shared prod passwords.
+              No schema dumps in chat. No shared prod passwords.
             </span>
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -86,8 +170,7 @@ export function LandingPage() {
             </a>
           </div>
           <p className="mt-5 text-xs text-gray-500">
-            Read-only connections · Credentials encrypted at rest · Agents
-            never write to your source DB
+            Read-only · Encrypted at rest · Agents never write to source
           </p>
         </div>
       </section>
@@ -96,7 +179,7 @@ export function LandingPage() {
       <section className="pb-12 -mt-4">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <p className="text-center text-xs font-medium text-gray-400 uppercase tracking-wider mb-5">
-            Works with every MCP-compatible AI tool
+            Works with MCP-compatible tools
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-gray-500">
             {[
@@ -245,75 +328,94 @@ export function LandingPage() {
             <span className="text-gray-400">So you keep pasting it into chat.</span>
           </h2>
           <p className="mt-6 text-lg text-gray-500 text-center max-w-2xl mx-auto">
-            Every AI conversation starts blind. Your Cursor doesn't know your
-            customers. Your Claude has never seen your orders table. The only
-            workarounds are bad: paste rows in by hand, hand out a read-only
-            prod password, or build your own MCP server.
+            AI chats start blind—no live tables. So you paste rows, leak a
+            read-only prod password into MCP configs, or build plumbing yourself.
           </p>
 
-          <div className="mt-16 grid sm:grid-cols-2 gap-6">
+          <div className="mt-12 grid sm:grid-cols-2 gap-4">
             {/* Before */}
-            <div className="bg-white rounded-2xl p-6 border border-red-100 shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-6 h-6 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-xs">
-                  &times;
+            <div className="bg-white rounded-xl p-5 border border-red-100 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-5 h-5 rounded-full bg-red-100 text-red-500 flex items-center justify-center shrink-0">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="w-3 h-3"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </span>
                 <span className="text-sm font-semibold text-red-600">
                   Without TeamMem
                 </span>
               </div>
-              <ul className="space-y-3 text-sm text-gray-600">
+              <ul className="space-y-2 text-sm text-gray-600 leading-snug">
                 <li className="flex items-start gap-2">
-                  <span className="text-red-300 mt-0.5 shrink-0">--</span>
-                  "Let me paste the customer list into this chat again..."
+                  <span className="text-red-300 mt-1 shrink-0">–</span>
+                  Pasting the customer list into chat—again
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-red-300 mt-0.5 shrink-0">--</span>
-                  Shared read-only DB password in 4 team members' MCP configs
+                  <span className="text-red-300 mt-1 shrink-0">–</span>
+                  Same read-only prod password in four MCP configs
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-red-300 mt-0.5 shrink-0">--</span>
-                  Sales agent can see every column including revenue and PII
+                  <span className="text-red-300 mt-1 shrink-0">–</span>
+                  Sales agent sees revenue, PII—everything
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-red-300 mt-0.5 shrink-0">--</span>
-                  No audit trail of what AI agents read or when
+                  <span className="text-red-300 mt-1 shrink-0">–</span>
+                  Zero log of what agents read, or when
                 </li>
               </ul>
             </div>
 
             {/* After */}
-            <div className="bg-white rounded-2xl p-6 border border-green-100 shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold">
-                  &check;
+            <div className="bg-white rounded-xl p-5 border border-green-100 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="w-3 h-3"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </span>
                 <span className="text-sm font-semibold text-green-600">
                   With TeamMem
                 </span>
               </div>
-              <ul className="space-y-3 text-sm text-gray-600">
+              <ul className="space-y-2 text-sm text-gray-600 leading-snug">
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-0.5 shrink-0">+</span>
-                  Connect Postgres once — every agent on the team reads through
-                  TeamMem
+                  One Postgres connector—every agent via TeamMem
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-0.5 shrink-0">+</span>
-                  DB credentials encrypted, never shared with agents or users
+                  Credentials encrypted—never in agent configs
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-0.5 shrink-0">+</span>
-                  Per-agent, per-column redaction. Sales agent sees{" "}
-                  <code className="text-xs bg-gray-100 px-1 rounded">email</code>{" "}
-                  but not{" "}
+                  Per-agent columns—sales gets{" "}
+                  <code className="text-xs bg-gray-100 px-1 rounded">email</code>,
+                  not{" "}
                   <code className="text-xs bg-gray-100 px-1 rounded">
                     credit_card_last4
                   </code>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-400 mt-0.5 shrink-0">+</span>
-                  Full audit trail: which agent read which row, when
+                  Audit: agent, row, timestamp
                 </li>
               </ul>
             </div>
@@ -735,12 +837,11 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-              One connection for every source
+              One connection, every source
             </h2>
             <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-              Postgres is just the start. The same permission model,
-              audit trail, and column redaction applies to every source you
-              connect — and they all become one surface your agents query.
+              Same permissions, redaction, and audit on every connector—one
+              surface for your agents.
             </p>
           </div>
 
@@ -748,68 +849,89 @@ export function LandingPage() {
             {[
               {
                 name: "Postgres",
-                sub: "Supabase, Neon, RDS, plain PG",
+                sub: "Neon, Supabase, RDS",
                 status: "beta",
+                iconKey: "postgres",
+                iconBg: "bg-[#336791]/10 text-[#336791]",
               },
               {
                 name: "Google Sheets",
-                sub: "Any shared spreadsheet",
-                status: "next",
+                sub: "Sheets",
+                status: "in progress",
+                iconKey: "sheets",
+                iconBg: "bg-[#0F9D58]/10 text-[#0F9D58]",
               },
               {
                 name: "Notion",
-                sub: "Databases + docs",
-                status: "next",
+                sub: "DBs + docs",
+                status: "in progress",
+                iconKey: "notion",
+                iconBg: "bg-gray-100 text-gray-900",
               },
               {
                 name: "Linear",
-                sub: "Issues, projects, cycles",
-                status: "planned",
+                sub: "Issues",
+                status: "in progress",
+                iconKey: "linear",
+                iconBg: "bg-[#5E6AD2]/10 text-[#5E6AD2]",
               },
               {
                 name: "Airtable",
-                sub: "Bases + views",
-                status: "planned",
+                sub: "Bases",
+                status: "in progress",
+                iconKey: "airtable",
+                iconBg: "bg-[#FCB400]/10 text-[#F59B00]",
               },
               {
                 name: "MySQL / MariaDB",
-                sub: "Drop-in Postgres sibling",
-                status: "planned",
+                sub: "MySQL + Maria",
+                status: "in progress",
+                iconKey: "mysql",
+                iconBg: "bg-[#00758F]/10 text-[#00758F]",
               },
               {
                 name: "BigQuery",
-                sub: "Read-only analytics access",
-                status: "planned",
+                sub: "Warehouse",
+                status: "in progress",
+                iconKey: "bigquery",
+                iconBg: "bg-[#4285F4]/10 text-[#4285F4]",
               },
               {
-                name: "+ MCP servers",
-                sub: "Wrap any vendor's MCP",
-                status: "vision",
+                name: "MCP servers",
+                sub: "Any server",
+                status: "in progress",
+                iconKey: "mcp",
+                iconBg: "bg-gray-100 text-gray-700",
               },
             ].map((src) => (
               <div
                 key={src.name}
-                className="bg-white rounded-xl border border-gray-100 p-4 flex flex-col gap-1.5 hover:border-gray-200 hover:shadow-sm transition-all"
+                className="bg-white rounded-xl border border-gray-100 p-3 flex items-center gap-3 hover:border-gray-200 hover:shadow-sm transition-all"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium text-gray-900 text-sm truncate">
-                    {src.name}
-                  </span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${
-                      src.status === "beta"
-                        ? "bg-blue-100 text-blue-700"
-                        : src.status === "next"
-                          ? "bg-violet-100 text-violet-700"
-                          : src.status === "planned"
-                            ? "bg-gray-100 text-gray-600"
-                            : "bg-amber-100 text-amber-700"
-                    }`}
-                  >
-                    {src.status}
+                <div
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${src.iconBg}`}
+                >
+                  <span className="w-5 h-5 [&>svg]:w-full [&>svg]:h-full">
+                    {BRAND_ICONS[src.iconKey]}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">{src.sub}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-gray-900 text-sm truncate">
+                      {src.name}
+                    </span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${
+                        src.status === "beta"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-amber-50 text-amber-700"
+                      }`}
+                    >
+                      {src.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 truncate">{src.sub}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -817,21 +939,18 @@ export function LandingPage() {
           <div className="mt-10 grid sm:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl border border-gray-100 p-4">
               <p className="text-xs font-semibold text-gray-900 mb-1">
-                One connection, many agents
+                One sync, many keys
               </p>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Connect once per source. Every teammate's AI tool reads
-                from the same synced snapshot, each with its own scoped key.
+                One connection per source. Each agent gets its own scoped key.
               </p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-4">
               <p className="text-xs font-semibold text-gray-900 mb-1">
-                Same permission model everywhere
+                Same policy everywhere
               </p>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Column redaction, audit trail, rate limits — applied
-                uniformly whether the source is Postgres, Sheets, or
-                Notion. One policy surface, not six.
+                Redaction, audit, rate limits—same rules on every connector.
               </p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-4">
@@ -839,17 +958,15 @@ export function LandingPage() {
                 Cross-source queries
               </p>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Ask *"which enterprise customers mentioned pricing in
-                Slack last week?"* — one question, two sources, one
-                answer. Agents don't need to know where data lives.
+                <em>"Which enterprise accounts mentioned pricing in Slack?"</em>{" "}
+                One question. Multiple sources. One answer.
               </p>
             </div>
           </div>
 
           <p className="mt-8 text-center text-xs text-gray-400 max-w-2xl mx-auto">
-            As more vendors ship their own MCP servers, TeamMem wraps them
-            with your team's identity, scope, and audit layer — so you get
-            a new source without waiting for us to build a connector.
+            Vendor ships an MCP? Wrap it with your identity, scope, and
+            audit—no custom connector wait.
           </p>
         </div>
       </section>
@@ -859,11 +976,10 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900">
-              Your data, the way each agent should see it
+              Same table. Different agent views.
             </h2>
             <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-              Same source table. Different views. Column-level redaction is
-              enforced before a single byte leaves the API.
+              Column redaction enforced before anything leaves the API.
             </p>
           </div>
 
