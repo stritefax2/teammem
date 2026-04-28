@@ -28,7 +28,7 @@ export function LandingPage() {
               to="/register"
               className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
             >
-              Get started
+              Try it free
             </Link>
           </div>
         </div>
@@ -154,7 +154,7 @@ export function LandingPage() {
                     </span>
                   </div>
                 </div>
-                <div className="grid sm:grid-cols-3 gap-3">
+                <div className="grid sm:grid-cols-2 gap-3">
                   {[
                     {
                       name: "customers",
@@ -167,12 +167,6 @@ export function LandingPage() {
                       sub: "public.orders",
                       count: 18204,
                       synced: true,
-                    },
-                    {
-                      name: "Decisions",
-                      sub: "native · writable",
-                      count: 23,
-                      synced: false,
                     },
                   ].map((c) => (
                     <div
@@ -219,8 +213,8 @@ export function LandingPage() {
                     </span>
                     <span>
                       <span className="text-purple-400">Claude Desktop</span>{" "}
-                      wrote 3 entries to{" "}
-                      <span className="text-gray-300">Decisions</span>
+                      read 12 rows from{" "}
+                      <span className="text-gray-300">orders</span>
                     </span>
                     <span className="text-gray-600 ml-auto">15m ago</span>
                   </div>
@@ -470,11 +464,8 @@ export function LandingPage() {
                     </ul>
                     <div className="pt-1.5 border-t border-gray-200 text-xs text-gray-600">
                       <p>
-                        On Q3 decisions — your team agreed last week to
-                        move enterprise to usage-based billing:{" "}
-                        <span className="text-blue-600 underline underline-offset-2 cursor-pointer">
-                          Decisions#q3-pricing
-                        </span>
+                        Want me to pull their recent orders and account
+                        health score too?
                       </p>
                     </div>
                   </div>
@@ -512,7 +503,8 @@ export function LandingPage() {
                     </span>
                     <span>
                       It queried your synced snapshot with a typed filter —
-                      not your prod DB.
+                      not your prod DB. Denied columns never made it into
+                      the response.
                     </span>
                   </li>
                   <li className="flex gap-3">
@@ -520,18 +512,8 @@ export function LandingPage() {
                       3
                     </span>
                     <span>
-                      Cross-referenced last week's decision log from the{" "}
-                      <code className="text-xs bg-gray-100 px-1 rounded">Decisions</code>{" "}
-                      native collection.
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
-                      4
-                    </span>
-                    <span>
-                      Cited both. Sarah can click through to verify every
-                      row. Everything's audited.
+                      Every row is clickable; Sarah can verify exactly what
+                      Claude saw. Every query is audited.
                     </span>
                   </li>
                 </ol>
@@ -1129,15 +1111,15 @@ export function LandingPage() {
               What your agents get
             </h2>
             <p className="mt-3 text-gray-500 max-w-lg mx-auto">
-              8 MCP tools, wired automatically. Works with any MCP-compatible
-              AI tool.
+              Six read tools, wired automatically. Works with any
+              MCP-compatible AI tool.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               {
                 tool: "list_collections",
-                desc: "Discover what tables, native collections, and column schemas exist",
+                desc: "Discover what tables and column schemas are exposed",
                 example: "Called first in every conversation",
               },
               {
@@ -1152,23 +1134,13 @@ export function LandingPage() {
               },
               {
                 tool: "search",
-                desc: "Semantic + full-text search over prose columns and native docs",
+                desc: "Semantic + full-text search over prose columns",
                 example: "\"customers mentioning pricing pushback\"",
               },
               {
                 tool: "read_entry",
-                desc: "Read one full row or native entry by ID",
+                desc: "Read one full row by ID",
                 example: "Fetch Acme's full customer record",
-              },
-              {
-                tool: "write_entry",
-                desc: "Create entries in native collections (never in synced tables)",
-                example: "Log a Q3 pricing decision for the team",
-              },
-              {
-                tool: "update_entry",
-                desc: "Update native entries with optimistic-lock conflict detection",
-                example: "Amend yesterday's meeting summary",
               },
               {
                 tool: "workspace_info",
@@ -1192,154 +1164,11 @@ export function LandingPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ─── Native layer / where agents capture what they learn ─── */}
-      <section className="py-20 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="grid sm:grid-cols-2 gap-10 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-violet-600 bg-violet-50 px-3 py-1 rounded-full mb-4">
-                The native layer
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                Where your agents capture what they learn
-              </h2>
-              <p className="text-gray-600 leading-relaxed">
-                Connected tables are read-only. But agents need somewhere to
-                <em> write </em> — decisions, meeting notes, weekly summaries,
-                observations linked back to specific rows. That's what native
-                collections are for: writable, versioned, auditable, and
-                referenceable from connected data.
-              </p>
-              <ul className="mt-5 space-y-2 text-sm text-gray-600">
-                <li className="flex items-start gap-2">
-                  <span className="text-violet-400 mt-0.5">+</span>
-                  <span>
-                    Claude writes "4 enterprise customers flagged pricing
-                    concerns this week" — linked to the 4 synced rows
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-violet-400 mt-0.5">+</span>
-                  <span>
-                    Cursor logs a decision about an API redesign that the
-                    whole team's AI can read tomorrow
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-violet-400 mt-0.5">+</span>
-                  <span>
-                    Meeting notes, specs, retros — searchable by every agent,
-                    versioned, with full history
-                  </span>
-                </li>
-              </ul>
-            </div>
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 space-y-3">
-              <div className="flex items-start gap-3 bg-violet-50/50 rounded-lg p-3 border border-violet-100">
-                <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
-                  A
-                </span>
-                <div>
-                  <p className="text-sm text-gray-800 font-medium">
-                    Q3 pricing pushback
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    by Claude · references 4 rows in{" "}
-                    <code className="text-[11px] bg-gray-100 px-1 rounded">
-                      customers
-                    </code>
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 bg-violet-50/50 rounded-lg p-3 border border-violet-100">
-                <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
-                  A
-                </span>
-                <div>
-                  <p className="text-sm text-gray-800 font-medium">
-                    Decision: move to usage-based billing for enterprise
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    by Cursor · v2 · 2h ago
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-3 border border-gray-100">
-                <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
-                  S
-                </span>
-                <div>
-                  <p className="text-sm text-gray-800 font-medium">
-                    Standup — Sep 14
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    by Sarah · 3 takeaways
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Testimonials strip ─── */}
-      <section className="py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <p className="text-center text-xs font-medium text-gray-400 uppercase tracking-wider mb-10">
-            From teams replacing their copy-paste-into-chat workflow
-          </p>
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              {
-                quote:
-                  "We stopped maintaining three different AI context docs. Claude, Cursor, and our CI bot all read from the same customer view now.",
-                role: "Head of Engineering",
-                org: "Series B SaaS · design partner",
-              },
-              {
-                quote:
-                  "The column redaction is the unlock. My sales agent sees what sales should see. Our data team isn't the bottleneck anymore.",
-                role: "VP RevOps",
-                org: "Series A fintech · early access",
-              },
-              {
-                quote:
-                  "I stopped pasting CSVs. My Cursor just knows about our users table. It feels obvious in hindsight.",
-                role: "Solo founder",
-                org: "YC W26 · private beta",
-              },
-            ].map((t, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <svg
-                  className="w-6 h-6 text-blue-200 mb-3"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
-                </svg>
-                <p className="text-sm text-gray-800 leading-relaxed mb-4">
-                  {t.quote}
-                </p>
-                <div className="flex items-center gap-2.5 pt-3 border-t border-gray-100">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-200 to-violet-200" />
-                  <div>
-                    <p className="text-xs font-medium text-gray-900">
-                      {t.role}
-                    </p>
-                    <p className="text-[11px] text-gray-500">{t.org}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="mt-8 text-center text-xs text-gray-400">
-            Names withheld during private beta — real teams, real usage.
+          <p className="mt-8 text-center text-xs text-gray-400 max-w-xl mx-auto">
+            Plus <code className="bg-gray-100 text-gray-600 px-1 rounded">write_entry</code> and{" "}
+            <code className="bg-gray-100 text-gray-600 px-1 rounded">update_entry</code>{" "}
+            for agents that need to persist observations back to scoped
+            writable collections. Never writes to your source DB.
           </p>
         </div>
       </section>
@@ -1410,7 +1239,8 @@ export function LandingPage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500 font-bold">+</span>
-                  Unlimited native collections & entries
+                  Full audit trail + scoped writable collections for agent
+                  output
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500 font-bold">+</span>
@@ -1525,7 +1355,7 @@ export function LandingPage() {
               </a>
             </div>
             <p className="mt-5 text-xs text-gray-500">
-              No credit card · Self-host with one migration · Works with any
+              No credit card · Connects in 10 minutes · Works with any
               MCP-compatible AI
             </p>
           </div>

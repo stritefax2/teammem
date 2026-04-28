@@ -8,10 +8,9 @@ Connect Postgres once. Claude, Cursor, ChatGPT, and every other
 MCP-compatible AI tool on your team gets scoped, audited, column-level
 redacted read access. No pasting schemas into chat. No shared prod passwords.
 
-[Product](https://github.com/stritefax2/teammem) ·
+[Try it free](https://app.teammem.dev) ·
 [Data handling](./DATA_HANDLING.md) ·
-[Deploy](./DEPLOY.md) ·
-[Launch checklist](./LAUNCH.md) ·
+[Self-host](./DEPLOY.md) ·
 [Contributing](./CONTRIBUTING.md)
 
 </div>
@@ -212,11 +211,16 @@ Good first issues:
   pattern).
 - Resend-invite and copy-invite-link buttons in Settings → Members.
 
-## Hosted version
+## Hosted
 
-If you don't want to run six containers yourself — managed TeamMem Cloud
-is coming. Same codebase, plus SSO, advanced audit, priority connector
-requests, managed backups, uptime SLA. [Register interest](https://github.com/stritefax2/teammem/issues/new?title=Interested+in+TeamMem+Cloud).
+TeamMem runs as a hosted app at
+[app.teammem.dev](https://app.teammem.dev) — free while in private beta
+with a small group of design partners. Sign up, connect your Postgres,
+generate a scoped agent key, and paste the config into Cursor or
+Claude. That's the install.
+
+If you'd rather run it yourself, [DEPLOY.md](./DEPLOY.md) walks you
+through it — same codebase, same migrations, same MCP server.
 
 ## License
 
