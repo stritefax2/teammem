@@ -3,7 +3,7 @@ import pg from "pg";
 const pool = new pg.Pool({
   connectionString:
     process.env.DATABASE_URL ||
-    "postgresql://teammem:teammem@localhost:5432/teammem",
+    "postgresql://rhona:rhona@localhost:5432/rhona",
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,

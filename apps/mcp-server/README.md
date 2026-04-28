@@ -1,6 +1,6 @@
-# teammem-mcp
+# rhona-mcp
 
-MCP server for [TeamMem](https://teammem.dev) — connect Claude, Cursor, ChatGPT, or any MCP-compatible AI tool to your team's persistent, permissioned knowledge base.
+MCP server for [Rhona](https://rhona.dev) — connect Claude, Cursor, ChatGPT, or any MCP-compatible AI tool to your team's persistent, permissioned knowledge base.
 
 ## Quick Setup
 
@@ -16,13 +16,13 @@ MCP server for [TeamMem](https://teammem.dev) — connect Claude, Cursor, ChatGP
 ```json
 {
   "mcpServers": {
-    "teammem": {
+    "rhona": {
       "command": "npx",
-      "args": ["-y", "teammem-mcp"],
+      "args": ["-y", "rhona-mcp"],
       "env": {
-        "TEAMMEM_API_KEY": "tm_sk_your_key_here",
-        "TEAMMEM_WORKSPACE": "your-workspace-id",
-        "TEAMMEM_API_URL": "https://your-api.vercel.app"
+        "RHONA_API_KEY": "tm_sk_your_key_here",
+        "RHONA_WORKSPACE": "your-workspace-id",
+        "RHONA_API_URL": "https://your-api.vercel.app"
       }
     }
   }
@@ -34,13 +34,13 @@ MCP server for [TeamMem](https://teammem.dev) — connect Claude, Cursor, ChatGP
 ```json
 {
   "mcpServers": {
-    "teammem": {
+    "rhona": {
       "command": "npx",
-      "args": ["-y", "teammem-mcp"],
+      "args": ["-y", "rhona-mcp"],
       "env": {
-        "TEAMMEM_API_KEY": "tm_sk_your_key_here",
-        "TEAMMEM_WORKSPACE": "your-workspace-id",
-        "TEAMMEM_API_URL": "https://your-api.vercel.app"
+        "RHONA_API_KEY": "tm_sk_your_key_here",
+        "RHONA_WORKSPACE": "your-workspace-id",
+        "RHONA_API_URL": "https://your-api.vercel.app"
       }
     }
   }
@@ -66,16 +66,16 @@ Your AI tool now has access to these tools:
 
 | Variable | Required | Description |
 |---|---|---|
-| `TEAMMEM_API_KEY` | Yes | Agent API key (starts with `tm_sk_`) |
-| `TEAMMEM_WORKSPACE` | Yes | Workspace UUID |
-| `TEAMMEM_API_URL` | No | API base URL (default: `http://localhost:3001`) |
+| `RHONA_API_KEY` | Yes | Agent API key (starts with `tm_sk_`) |
+| `RHONA_WORKSPACE` | Yes | Workspace UUID |
+| `RHONA_API_URL` | No | API base URL (default: `http://localhost:3001`) |
 
 ## SSE Transport (Remote)
 
 For remote connections without running a local process:
 
 ```
-teammem-mcp-sse
+rhona-mcp-sse
 ```
 
 Or configure your MCP client to connect via SSE:
@@ -83,7 +83,7 @@ Or configure your MCP client to connect via SSE:
 ```json
 {
   "mcpServers": {
-    "teammem": {
+    "rhona": {
       "transport": "sse",
       "url": "https://your-mcp-server.com/sse",
       "headers": {

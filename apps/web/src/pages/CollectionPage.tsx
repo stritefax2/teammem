@@ -7,7 +7,7 @@ import { AppShell } from "../components/AppShell.js";
 import Markdown from "react-markdown";
 import { ImportDialog } from "../components/ImportDialog.js";
 import { DocumentUpload } from "../components/DocumentUpload.js";
-import type { ChangeEvent } from "@teammem/shared";
+import type { ChangeEvent } from "@rhona/shared";
 
 interface Collection {
   id: string;
