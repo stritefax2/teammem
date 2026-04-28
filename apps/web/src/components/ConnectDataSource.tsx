@@ -22,8 +22,13 @@ interface PrivilegeError {
   };
 }
 
-const ROLE_SQL = `CREATE ROLE teammem_readonly WITH LOGIN PASSWORD 'change-me';
-GRANT CONNECT ON DATABASE your_db TO teammem_readonly;
+// Default to `postgres` — that's the database name on Supabase, Neon, and
+// the default RDS template. If a user has a custom DB name they'll see the
+// fail and know to swap it. Beats leaving an obvious placeholder.
+const ROLE_SQL = `-- Run in your DB's SQL editor, then use the password below
+-- in the connection string. On Supabase: Dashboard → SQL Editor.
+CREATE ROLE teammem_readonly WITH LOGIN PASSWORD 'change-me';
+GRANT CONNECT ON DATABASE postgres TO teammem_readonly;
 GRANT USAGE ON SCHEMA public TO teammem_readonly;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO teammem_readonly;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
@@ -158,8 +163,16 @@ export function ConnectDataSource({
                   Create a read-only role first
                 </p>
                 <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">
-                  Run this in your DB and use the new user's credentials
-                  below.
+                  Replace{" "}
+                  <code className="bg-white border border-gray-200 px-1 rounded font-mono text-[11px]">
+                    'change-me'
+                  </code>{" "}
+                  with a real password before running. The DB name{" "}
+                  <code className="bg-white border border-gray-200 px-1 rounded font-mono text-[11px]">
+                    postgres
+                  </code>{" "}
+                  is correct for Supabase, Neon, and default RDS — only
+                  change it if your DB has a different name.
                 </p>
               </div>
               <button
@@ -173,6 +186,44 @@ export function ConnectDataSource({
             <pre className="bg-gray-950 text-emerald-300 p-3 overflow-x-auto text-[11px] leading-snug font-mono">
 {ROLE_SQL}
             </pre>
+            <div className="px-3 py-2.5 border-t border-gray-200 bg-white">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">
+                Where to run it
+              </p>
+              <ul className="text-xs text-gray-700 space-y-1 leading-relaxed">
+                <li className="flex gap-2">
+                  <span className="font-medium text-gray-900 shrink-0 w-20">
+                    Supabase
+                  </span>
+                  <span className="text-gray-600">
+                    Dashboard →{" "}
+                    <span className="font-medium">SQL Editor</span> (left
+                    sidebar) → paste → Run
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-medium text-gray-900 shrink-0 w-20">
+                    Neon
+                  </span>
+                  <span className="text-gray-600">
+                    Project →{" "}
+                    <span className="font-medium">SQL Editor</span> (top
+                    nav) → paste → Run
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-medium text-gray-900 shrink-0 w-20">
+                    Self-hosted
+                  </span>
+                  <span className="text-gray-600">
+                    <code className="bg-gray-100 border border-gray-200 px-1 rounded font-mono">
+                      psql
+                    </code>{" "}
+                    as a superuser, or any DB GUI (TablePlus, pgAdmin)
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <label className="block mb-4">
