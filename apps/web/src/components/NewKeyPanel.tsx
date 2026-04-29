@@ -159,15 +159,29 @@ If you need to revoke or change the key's scope, ping me and I'll do it from the
                 Open Claude Desktop →{" "}
                 <span className="font-medium text-gray-900">Settings</span> →{" "}
                 <span className="font-medium text-gray-900">Developer</span> →{" "}
-                <span className="font-medium text-gray-900">Edit Config</span>
+                <span className="font-medium text-gray-900">Edit Config</span>{" "}
+                (opens{" "}
+                <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
+                  claude_desktop_config.json
+                </code>
+                )
               </li>
               <li>
                 <span className="text-gray-400 font-mono mr-1.5">2.</span>
-                Paste the config below and save
+                Paste the config below into that file and save. If the
+                file already has{" "}
+                <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
+                  mcpServers
+                </code>
+                , merge — don't overwrite your other tools.
               </li>
               <li>
                 <span className="text-gray-400 font-mono mr-1.5">3.</span>
-                Restart Claude Desktop
+                Quit Claude Desktop completely (
+                <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
+                  ⌘Q
+                </code>{" "}
+                on Mac — closing the window isn't enough) and reopen
               </li>
             </ol>
           )}
