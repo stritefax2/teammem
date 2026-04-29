@@ -187,6 +187,15 @@ export function AppShell({
                 Settings
               </Link>
             )}
+            <a
+              href="https://github.com/stritefax2/teammem#readme"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-500 hover:text-gray-700 hidden sm:inline"
+              title="Docs & code examples on GitHub"
+            >
+              Help
+            </a>
             <span className="text-xs text-gray-400 hidden sm:block">
               {user?.email}
             </span>

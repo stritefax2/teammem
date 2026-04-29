@@ -61,7 +61,7 @@ type ColPerms = {
   deny_fields: Set<string>;
 };
 
-type Tab = "members" | "agents" | "sources" | "audit";
+type Tab = "workspace" | "sources" | "agents" | "members" | "audit";
 
 function formatRelative(iso: string | null): string {
   if (!iso) return "never";
@@ -114,9 +114,11 @@ export function SettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") as Tab) || "members";
   const [tab, setTabState] = useState<Tab>(
-    ["members", "agents", "sources", "audit"].includes(initialTab)
+    ["workspace", "members", "agents", "sources", "audit"].includes(
+      initialTab
+    )
       ? initialTab
-      : "members"
+      : "workspace"
   );
   const fromOnboarding = searchParams.get("onboarding") === "1";
 
@@ -460,10 +462,11 @@ export function SettingsPage() {
         <div className="flex gap-1 mb-6 border-b border-gray-200">
           {(
             [
-              { id: "sources", label: "Data Sources" },
-              { id: "agents", label: "Agent Keys" },
+              { id: "workspace", label: "Workspace" },
+              { id: "sources", label: "Data sources" },
+              { id: "agents", label: "Agent keys" },
               { id: "members", label: "Members" },
-              { id: "audit", label: "Audit Log" },
+              { id: "audit", label: "Audit log" },
             ] as const
           ).map((t) => (
             <button
@@ -492,7 +495,7 @@ export function SettingsPage() {
                 onClick={() => setShowConnectSource(true)}
                 className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors shrink-0"
               >
-                Connect Postgres
+                Connect data source
               </button>
             </div>
 
@@ -753,9 +756,62 @@ export function SettingsPage() {
               </>
             )}
 
+          </div>
+        )}
+
+        {tab === "workspace" && (
+          <div className="space-y-6">
+            <div className="bg-white border border-gray-200 rounded-md p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                About this workspace
+              </h3>
+              <dl className="grid sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <dt className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
+                    Name
+                  </dt>
+                  <dd className="text-gray-900 font-medium">
+                    {workspaceName || "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
+                    Members
+                  </dt>
+                  <dd className="text-gray-900">
+                    {members.length}{" "}
+                    {pendingInvites.length > 0 && (
+                      <span className="text-gray-500 text-xs">
+                        · {pendingInvites.length} pending invite
+                        {pendingInvites.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
+                    Data sources
+                  </dt>
+                  <dd className="text-gray-900">{dataSources.length}</dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
+                    Agent keys
+                  </dt>
+                  <dd className="text-gray-900">{agentKeys.length}</dd>
+                </div>
+              </dl>
+              <p className="mt-4 text-xs text-gray-500 leading-relaxed">
+                Workspace ID:{" "}
+                <code className="font-mono bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded text-gray-700">
+                  {id}
+                </code>
+              </p>
+            </div>
+
             {/* Danger Zone — owners only. Hard to undo, easy to type past. */}
             {isOwner && workspaceName && (
-              <div className="mt-12 pt-6 border-t border-gray-200">
+              <div>
                 <div className="flex items-center gap-2 mb-3">
                   <h3 className="text-xs font-mono uppercase tracking-wider text-red-600">
                     Danger zone
@@ -769,13 +825,11 @@ export function SettingsPage() {
                     <p className="text-xs text-gray-600 mt-1 leading-relaxed">
                       Permanently removes the workspace and{" "}
                       <span className="font-medium text-gray-900">
-                        every collection, entry, agent key, audit record, and
-                        connected source
+                        every collection, entry, agent key, audit record,
+                        and connected source
                       </span>{" "}
                       under it. Connected source databases are{" "}
-                      <span className="font-medium text-gray-900">
-                        not
-                      </span>{" "}
+                      <span className="font-medium text-gray-900">not</span>{" "}
                       touched — only TeamMem's mirror of them. This cannot
                       be undone.
                     </p>
@@ -792,7 +846,9 @@ export function SettingsPage() {
                       <input
                         type="text"
                         value={confirmDeleteName}
-                        onChange={(e) => setConfirmDeleteName(e.target.value)}
+                        onChange={(e) =>
+                          setConfirmDeleteName(e.target.value)
+                        }
                         placeholder={workspaceName}
                         className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-red-600 focus:ring-1 focus:ring-red-600 outline-none"
                       />

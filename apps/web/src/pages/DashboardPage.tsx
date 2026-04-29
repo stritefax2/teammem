@@ -26,6 +26,11 @@ export function DashboardPage() {
         setWorkspaces(data.workspaces);
         if (data.workspaces.length === 0) {
           navigate("/onboarding", { replace: true });
+        } else if (data.workspaces.length === 1) {
+          // Single workspace = no real choice. Skip the dashboard
+          // entirely and drop the user where they actually work.
+          // The dashboard remains useful for users with 2+ workspaces.
+          navigate(`/w/${data.workspaces[0].id}`, { replace: true });
         }
       })
       .catch((e) => setError(e.message))
