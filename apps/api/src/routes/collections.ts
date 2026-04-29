@@ -10,6 +10,7 @@ import {
   canAccessCollection,
   filterDeniedFields,
 } from "../services/permissions.js";
+import { logAction } from "../services/audit.js";
 
 export const collectionRoutes = new Hono<AppEnv>();
 
@@ -49,6 +50,14 @@ collectionRoutes.get("/", async (c) => {
         canAccessCollection(permissions, c.name, "read")
       )
     : result.rows;
+
+  // Audit agent calls — humans browsing the dashboard would otherwise
+  // spam this row. Reads by an agent are the high-stakes signal.
+  if (auth.agentKeyId) {
+    logAction(auth, workspaceId, "list", "collections", undefined, {
+      count: collections.length,
+    });
+  }
 
   return c.json({ collections });
 });
@@ -258,6 +267,25 @@ collectionRoutes.get("/:id/entries", async (c) => {
         ),
       }))
     : result.rows;
+
+  // Audit agent reads of a collection's entries. The whole pitch is
+  // \"every read by every agent, with row IDs and timestamps\" — this
+  // is the row-level read that pitch is about.
+  if (auth.agentKeyId) {
+    const collectionWorkspaceResult = await query<{ workspace_id: string }>(
+      "SELECT workspace_id FROM collections WHERE id = $1",
+      [collectionId]
+    );
+    const ws = collectionWorkspaceResult.rows[0]?.workspace_id;
+    if (ws) {
+      logAction(auth, ws, "read", "entries", collectionId, {
+        collection: collectionName,
+        returned: entries.length,
+        q: q || undefined,
+        sort_by: sortByRaw,
+      });
+    }
+  }
 
   return c.json({
     entries,

@@ -52,9 +52,14 @@ export function ActivityFeed({
 
   const actionLabels: Record<string, string> = {
     create: "created",
-    read: "viewed",
+    read: "read",
     update: "updated",
     delete: "deleted",
+    list: "listed",
+    search: "searched",
+    query_structured: "queried",
+    aggregate: "aggregated",
+    store_document: "wrote",
   };
 
   return (

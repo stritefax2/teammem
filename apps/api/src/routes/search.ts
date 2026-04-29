@@ -17,6 +17,7 @@ import {
   filterDeniedFields,
 } from "../services/permissions.js";
 import type { AgentPermissions } from "../shared/index.js";
+import { logAction } from "../services/audit.js";
 
 export const searchRoutes = new Hono<AppEnv>();
 
@@ -166,6 +167,14 @@ searchRoutes.post("/", async (c) => {
     }));
   }
 
+  if (auth.agentKeyId) {
+    logAction(auth, workspaceId, "search", "entries", undefined, {
+      query: searchQuery.slice(0, 200),
+      returned: results.length,
+      collection: collection || undefined,
+    });
+  }
+
   return c.json({ results });
 });
 
@@ -301,6 +310,22 @@ searchRoutes.post("/structured", async (c) => {
         ),
       }))
     : result.rows;
+
+  if (auth.agentKeyId) {
+    logAction(
+      auth,
+      targetWorkspace,
+      "query_structured",
+      "entries",
+      collection,
+      {
+        collection: collectionName,
+        filters: parsed.data.filters?.length || 0,
+        returned: results.length,
+        total: countResult.rows[0].total,
+      }
+    );
+  }
 
   return c.json({
     results,
@@ -548,5 +573,22 @@ searchRoutes.post("/aggregate", async (c) => {
   const sql = `SELECT ${selectParts.join(", ")} FROM entries ${whereSql}${groupSql}${havingSql}${orderSql} LIMIT $${limitIdx}`;
 
   const result = await query(sql, params);
+
+  if (auth.agentKeyId) {
+    logAction(
+      auth,
+      colInfo.rows[0].workspace_id,
+      "aggregate",
+      "entries",
+      collection,
+      {
+        collection: colInfo.rows[0].name,
+        aggregations: parsed.data.aggregations?.length || 0,
+        groups: parsed.data.group_by?.length || 0,
+        returned: result.rows.length,
+      }
+    );
+  }
+
   return c.json({ results: result.rows });
 });
