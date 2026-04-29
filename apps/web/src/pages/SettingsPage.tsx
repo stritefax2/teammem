@@ -199,6 +199,38 @@ export function SettingsPage() {
         };
       }
       setScopedPerms(init);
+
+      // Deep-link: ?tab=agents&new=1&collection=<id> opens the create-key
+      // form pre-scoped to a single collection (read access only). Used
+      // by the "+ Agent key for this data" button on a synced collection.
+      const wantsNew = searchParams.get("new") === "1";
+      const targetCollectionId = searchParams.get("collection");
+      if (wantsNew && targetCollectionId) {
+        const target = data.collections.find(
+          (c) => c.id === targetCollectionId
+        );
+        if (target) {
+          const prefilled: Record<string, ColPerms> = {};
+          for (const col of data.collections) {
+            prefilled[col.name] = {
+              read: col.id === targetCollectionId,
+              write: false,
+              delete: false,
+              deny_fields: new Set(),
+            };
+          }
+          setScopedPerms(prefilled);
+          setKeyAccess("scoped");
+          setKeyName(`Claude Desktop — ${target.name}`);
+          setShowKeyForm(true);
+        }
+        // Clear the query params so a refresh doesn't keep re-opening
+        // the form on every navigation back to Settings.
+        const params = new URLSearchParams(searchParams);
+        params.delete("new");
+        params.delete("collection");
+        setSearchParams(params, { replace: true });
+      }
     });
   }, [id]);
 

@@ -180,6 +180,9 @@ collectionRoutes.get("/:id/entries", async (c) => {
   const collectionId = c.req.param("id");
   const limit = Number(c.req.query("limit")) || 50;
   const offset = Number(c.req.query("offset")) || 0;
+  const q = c.req.query("q")?.trim() || "";
+  const sortByRaw = c.req.query("sort_by")?.trim() || "updated_at";
+  const sortDir = c.req.query("sort_dir") === "asc" ? "ASC" : "DESC";
 
   // Per-key collection access and field redaction must be enforced here.
   // requireWorkspaceScope only confirms workspace membership; it does not
@@ -200,20 +203,49 @@ collectionRoutes.get("/:id/entries", async (c) => {
     return c.json({ error: "Access denied to this collection" }, 403);
   }
 
+  // Build dynamic WHERE / ORDER clauses. Field names are validated against
+  // a strict regex so we can interpolate them safely into ORDER BY (which
+  // doesn't accept parameter binding for column references in JSONB
+  // accessors). Filter is a case-insensitive ILIKE across content and the
+  // textual representation of structured_data — fast enough for typical
+  // collections, accurate for the user-typed-a-keyword case.
+  const SAFE_FIELD_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+  let orderClause: string;
+  if (sortByRaw === "updated_at" || sortByRaw === "created_at") {
+    orderClause = `${sortByRaw} ${sortDir}`;
+  } else if (SAFE_FIELD_RE.test(sortByRaw)) {
+    // Sort by a JSONB field. NULLS LAST so empty values fall to the end
+    // regardless of direction — matches user expectation in spreadsheet UI.
+    orderClause = `(structured_data->>'${sortByRaw}') ${sortDir} NULLS LAST`;
+  } else {
+    orderClause = "updated_at DESC";
+  }
+
+  const whereParts = ["collection_id = $1"];
+  const baseParams: unknown[] = [collectionId];
+  if (q) {
+    baseParams.push(`%${q}%`);
+    whereParts.push(
+      `(content ILIKE $${baseParams.length} OR structured_data::text ILIKE $${baseParams.length})`
+    );
+  }
+  const whereSql = `WHERE ${whereParts.join(" AND ")}`;
+
+  const listParams = [...baseParams, limit, offset];
   const result = await query(
     `SELECT id, collection_id, workspace_id, structured_data, content,
             created_by, created_by_agent, created_at, updated_at, version,
             source_row_id
      FROM entries
-     WHERE collection_id = $1
-     ORDER BY updated_at DESC
-     LIMIT $2 OFFSET $3`,
-    [collectionId, limit, offset]
+     ${whereSql}
+     ORDER BY ${orderClause}
+     LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+    listParams
   );
 
   const countResult = await query(
-    "SELECT COUNT(*)::int AS total FROM entries WHERE collection_id = $1",
-    [collectionId]
+    `SELECT COUNT(*)::int AS total FROM entries ${whereSql}`,
+    baseParams
   );
 
   const entries = permissions

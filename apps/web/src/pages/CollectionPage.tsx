@@ -67,18 +67,46 @@ export function CollectionPage() {
 
   const isConnected = Boolean(collection?.source_id);
 
+  // Debounce the filter so we don't fire a request on every keystroke.
+  // 250ms feels responsive without thrashing the API.
+  const [debouncedFilter, setDebouncedFilter] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedFilter(filterText), 250);
+    return () => clearTimeout(t);
+  }, [filterText]);
+
+  // When the filter changes, jump back to page 0 — otherwise users land
+  // on an empty page if their filtered set is shorter than their offset.
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedFilter, sortCol, sortDir]);
+
   const loadEntries = useCallback(() => {
     if (!collectionId) return;
     setLoading(true);
+    const params = new URLSearchParams({
+      limit: String(PAGE_SIZE),
+      offset: String(page * PAGE_SIZE),
+    });
+    if (debouncedFilter) params.set("q", debouncedFilter);
+    if (sortCol) {
+      params.set("sort_by", sortCol);
+      params.set("sort_dir", sortDir);
+    } else {
+      // Default sort is updated_at — let the user toggle direction by
+      // clicking the Updated column.
+      params.set("sort_by", "updated_at");
+      params.set("sort_dir", sortDir);
+    }
     apiFetch<{ entries: Entry[]; total: number }>(
-      `/api/v1/collections/${collectionId}/entries?limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`
+      `/api/v1/collections/${collectionId}/entries?${params.toString()}`
     )
       .then((data) => {
         setEntries(data.entries);
         setTotal(data.total);
       })
       .finally(() => setLoading(false));
-  }, [collectionId, page]);
+  }, [collectionId, page, debouncedFilter, sortCol, sortDir]);
 
   useEffect(() => {
     if (!collectionId) return;
@@ -204,32 +232,8 @@ export function CollectionPage() {
   const isStructured = columns.length > 0;
   const hasContent = entries.some((e) => e.content);
 
-  // Sort entries client-side
-  const sortedEntries = [...entries].sort((a, b) => {
-    if (!sortCol) {
-      return sortDir === "desc"
-        ? new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-        : new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
-    }
-    const aVal = String(a.structured_data?.[sortCol] ?? "");
-    const bVal = String(b.structured_data?.[sortCol] ?? "");
-    return sortDir === "asc"
-      ? aVal.localeCompare(bVal)
-      : bVal.localeCompare(aVal);
-  });
-
-  // Filter
-  const filtered = filterText
-    ? sortedEntries.filter((e) => {
-        const text = [
-          e.content,
-          ...Object.values(e.structured_data || {}).map(String),
-        ]
-          .join(" ")
-          .toLowerCase();
-        return text.includes(filterText.toLowerCase());
-      })
-    : sortedEntries;
+  // Server already returns rows ordered + filtered. Just use them.
+  const filtered = entries;
 
   function toggleSort(col: string) {
     if (sortCol === col) {
@@ -237,6 +241,19 @@ export function CollectionPage() {
     } else {
       setSortCol(col);
       setSortDir("asc");
+    }
+  }
+
+  // The Updated column shares the sort state with structured columns.
+  // Clicking it sets sortCol=null (sentinel for the updated_at server
+  // sort) and toggles direction. Re-clicking after sorting elsewhere
+  // jumps back to updated_at descending.
+  function toggleUpdatedSort() {
+    if (sortCol === null) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortCol(null);
+      setSortDir("desc");
     }
   }
 
@@ -285,15 +302,28 @@ export function CollectionPage() {
                   </p>
                 )}
             </div>
-            <button
-              onClick={handleSyncNow}
-              disabled={syncing || collection.sync_status === "syncing"}
-              className="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-800 disabled:opacity-60 transition-colors shrink-0"
-            >
-              {syncing || collection.sync_status === "syncing"
-                ? "Syncing..."
-                : "Sync now"}
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() =>
+                  navigate(
+                    `/w/${workspaceId}/settings?tab=agents&new=1&collection=${collectionId}`
+                  )
+                }
+                className="bg-white border border-gray-200 hover:border-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-xs font-medium transition-colors inline-flex items-center gap-1.5"
+              >
+                <span className="text-emerald-500">+</span>
+                Agent key for this data
+              </button>
+              <button
+                onClick={handleSyncNow}
+                disabled={syncing || collection.sync_status === "syncing"}
+                className="bg-gray-900 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-gray-800 disabled:opacity-60 transition-colors"
+              >
+                {syncing || collection.sync_status === "syncing"
+                  ? "Syncing..."
+                  : "Sync now"}
+              </button>
+            </div>
           </div>
         )}
 
@@ -506,15 +536,12 @@ export function CollectionPage() {
                       </th>
                     )}
                     <th
-                      onClick={() => {
-                        setSortCol(null);
-                        setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-                      }}
+                      onClick={toggleUpdatedSort}
                       className="text-left px-4 py-3 font-medium text-gray-600 text-xs uppercase tracking-wide w-28 cursor-pointer hover:bg-gray-100 transition-colors select-none"
                     >
                       <span className="inline-flex items-center gap-1">
                         Updated
-                        {!sortCol && (
+                        {sortCol === null && (
                           <span className="text-gray-700">
                             {sortDir === "asc" ? "↑" : "↓"}
                           </span>
@@ -535,18 +562,26 @@ export function CollectionPage() {
                       }
                       className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group"
                     >
-                      {columns.map((col) => (
-                        <td
-                          key={col}
-                          className="px-4 py-3 text-gray-900 max-w-[200px] truncate"
-                        >
-                          {entry.structured_data?.[col] != null
+                      {columns.map((col) => {
+                        const value =
+                          entry.structured_data?.[col] != null
                             ? String(entry.structured_data[col])
-                            : ""}
-                        </td>
-                      ))}
+                            : "";
+                        return (
+                          <td
+                            key={col}
+                            title={value}
+                            className="px-4 py-3 text-gray-900 max-w-[200px] truncate"
+                          >
+                            {value}
+                          </td>
+                        );
+                      })}
                       {hasContent && (
-                        <td className="px-4 py-3 text-gray-600 max-w-[300px] truncate">
+                        <td
+                          title={entry.content || ""}
+                          className="px-4 py-3 text-gray-600 max-w-[300px] truncate"
+                        >
                           {entry.content?.slice(0, 100) || ""}
                         </td>
                       )}
