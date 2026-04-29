@@ -176,15 +176,6 @@ export function WorkspacePage() {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-800">Collections</h2>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
-          >
-            New collection
-          </button>
-        </div>
 
         {showCreate && (
           <div className="mb-6 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
@@ -364,37 +355,11 @@ export function WorkspacePage() {
             </div>
           </div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {collections.map((col) => (
-              <Link
-                key={col.id}
-                to={`/w/${id}/c/${col.id}`}
-                className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-medium text-gray-900 truncate">
-                    {col.name}
-                  </h3>
-                  {col.source_id && (
-                    <span className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">
-                      synced
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                    {col.source_id ? "connected" : col.collection_type}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {col.entry_count} {col.source_id ? "rows" : "entries"}
-                  </span>
-                  {col.sync_status === "error" && (
-                    <span className="text-xs text-red-500">sync error</span>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
+          <CollectionSections
+            workspaceId={id!}
+            collections={collections}
+            onNewNative={() => setShowCreate(true)}
+          />
         )}
 
         {/* Next steps panel — show when workspace has little activity */}
@@ -485,5 +450,149 @@ export function WorkspacePage() {
         )}
       </main>
     </AppShell>
+  );
+}
+
+// Split collections into "Synced data" (source-backed, read-only) and
+// "Native collections" (writable). Different lifecycles, different
+// access patterns — flattening them into one list confuses users about
+// what each card actually is.
+function CollectionSections({
+  workspaceId,
+  collections,
+  onNewNative,
+}: {
+  workspaceId: string;
+  collections: Collection[];
+  onNewNative: () => void;
+}) {
+  const synced = collections.filter((c) => c.source_id);
+  const native = collections.filter((c) => !c.source_id);
+
+  return (
+    <div className="space-y-10">
+      {/* Synced data — source-backed, read-only */}
+      <section>
+        <div className="flex items-center justify-between mb-3 gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">
+              Synced data
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+              Read-only mirrors of tables from your source databases.
+              What your agents query.
+            </p>
+          </div>
+          <Link
+            to={`/w/${workspaceId}/settings?tab=sources`}
+            className="text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:border-gray-300 px-2.5 py-1.5 rounded-md transition-colors shrink-0 inline-flex items-center gap-1.5"
+          >
+            <span className="text-emerald-500">+</span>
+            Connect source
+          </Link>
+        </div>
+        {synced.length === 0 ? (
+          <div className="bg-gray-50 border border-dashed border-gray-200 rounded-md p-5 text-center">
+            <p className="text-sm text-gray-600">
+              No source databases connected.
+            </p>
+            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+              Connect a Postgres source and pick which tables to expose
+              — that's the data your AI tools will read.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {synced.map((col) => (
+              <CollectionCard
+                key={col.id}
+                workspaceId={workspaceId}
+                col={col}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Native collections — writable, for agent notes / decisions */}
+      <section>
+        <div className="flex items-center justify-between mb-3 gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">
+              Native collections
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+              Writable. Where agents log decisions, observations, or
+              meeting notes alongside the data they read.
+            </p>
+          </div>
+          <button
+            onClick={onNewNative}
+            className="text-xs font-medium bg-gray-900 text-white hover:bg-gray-800 px-3 py-1.5 rounded-md transition-colors shrink-0"
+          >
+            + New collection
+          </button>
+        </div>
+        {native.length === 0 ? (
+          <div className="bg-gray-50 border border-dashed border-gray-200 rounded-md p-5 text-center">
+            <p className="text-sm text-gray-600">
+              No native collections yet.
+            </p>
+            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+              Optional. Pick a template to give agents a place to write
+              decisions, meeting notes, or observations.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {native.map((col) => (
+              <CollectionCard
+                key={col.id}
+                workspaceId={workspaceId}
+                col={col}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function CollectionCard({
+  workspaceId,
+  col,
+}: {
+  workspaceId: string;
+  col: Collection;
+}) {
+  const isSynced = Boolean(col.source_id);
+  return (
+    <Link
+      to={`/w/${workspaceId}/c/${col.id}`}
+      className="bg-white p-4 rounded-md border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-medium text-gray-900 truncate">{col.name}</h3>
+        {isSynced && (
+          <span className="text-[10px] font-mono uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded shrink-0">
+            synced
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-2 mt-2">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded">
+          {isSynced ? "read-only" : col.collection_type}
+        </span>
+        <span className="text-xs text-gray-400">
+          {col.entry_count} {isSynced ? "rows" : "entries"}
+        </span>
+        {col.sync_status === "error" && (
+          <span className="text-xs text-red-600 font-medium">
+            sync error
+          </span>
+        )}
+      </div>
+    </Link>
   );
 }
