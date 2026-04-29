@@ -18,7 +18,14 @@ export const createWorkspaceSchema = z.object({
 
 export const inviteMemberSchema = z.object({
   email: z.string().email(),
-  role: z.enum(["owner", "editor", "viewer"]).default("editor"),
+  // Roles in v1: only "owner" is enforced (gates workspace deletion).
+  // "member" is the default for everyone else. "editor" and "viewer"
+  // are accepted as aliases for "member" so older invites and DB rows
+  // continue to validate without a migration. We don't expose the
+  // alias values in the UI.
+  role: z
+    .enum(["owner", "member", "editor", "viewer"])
+    .default("member"),
 });
 
 export const sourceConfigSchema = z.object({

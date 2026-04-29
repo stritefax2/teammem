@@ -136,7 +136,7 @@ export function SettingsPage() {
   const [deletingWorkspace, setDeletingWorkspace] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("editor");
+  const [inviteRole, setInviteRole] = useState("member");
   const [inviteError, setInviteError] = useState("");
   const [inviteSuccess, setInviteSuccess] = useState("");
 
@@ -613,11 +613,28 @@ export function SettingsPage() {
 
         {tab === "members" && (
           <div>
-            <p className="text-sm text-gray-600 mb-4 max-w-2xl leading-relaxed">
+            <p className="text-sm text-gray-600 mb-2 max-w-2xl leading-relaxed">
               Invite teammates so their AI tools can read the same connected
               data and shared collections. Each member can generate their
               own scoped agent keys — your DB credentials are never shared.
             </p>
+            <div className="mb-4 bg-gray-50 border border-gray-200 rounded-md p-3 max-w-2xl">
+              <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1">
+                trust model
+              </p>
+              <p className="text-xs text-gray-700 leading-relaxed">
+                Anyone you invite to this workspace sees{" "}
+                <span className="font-medium text-gray-900">every collection here</span>{" "}
+                — including columns marked redacted for agents. Workspaces
+                are the unit of trust. Use separate workspaces if different
+                people should see different data. The fine-grained scoping
+                lives on{" "}
+                <em className="not-italic font-medium text-gray-900">
+                  agent keys
+                </em>
+                , not on member roles.
+              </p>
+            </div>
 
             {/* Invite form */}
             <form
@@ -643,9 +660,9 @@ export function SettingsPage() {
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value)}
                   className="mt-1 block w-full sm:w-auto rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
+                  title="Member: full read/write within this workspace. Owner: same, plus can delete the workspace."
                 >
-                  <option value="editor">Editor</option>
-                  <option value="viewer">Viewer</option>
+                  <option value="member">Member</option>
                   <option value="owner">Owner</option>
                 </select>
               </label>
@@ -692,8 +709,8 @@ export function SettingsPage() {
                       )}
                     </div>
                   </div>
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                    {m.role}
+                  <span className="text-[10px] font-mono uppercase tracking-wider bg-gray-100 text-gray-700 border border-gray-200 px-1.5 py-0.5 rounded">
+                    {m.role === "owner" ? "owner" : "member"}
                   </span>
                 </div>
               ))}
@@ -726,8 +743,8 @@ export function SettingsPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                          Pending · {inv.role}
+                        <span className="text-[10px] font-mono uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded">
+                          pending · {inv.role === "owner" ? "owner" : "member"}
                         </span>
                       </div>
                     </div>

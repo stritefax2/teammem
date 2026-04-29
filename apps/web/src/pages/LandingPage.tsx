@@ -1340,6 +1340,16 @@ export function LandingPage() {
                 <li className="flex items-start gap-2">
                   <span className="text-gray-400 mt-0.5 shrink-0">○</span>
                   <span className="text-gray-600">
+                    Workspace = trust boundary. Members see all collections
+                    in their workspace; fine-grained scoping is on{" "}
+                    <em className="not-italic">agent keys</em>, not member
+                    roles. Built for internal teams — not customer-facing
+                    portals (yet).
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-gray-400 mt-0.5 shrink-0">○</span>
+                  <span className="text-gray-600">
                     Founder retains DB-admin access (early stage). Not yet
                     SOC 2 — happy to walk through controls 1:1.
                   </span>
