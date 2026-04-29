@@ -32,7 +32,6 @@ export function WorkspacePage() {
   const [dismissedNudge, setDismissedNudge] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newType, setNewType] = useState<string>("documents");
   const [seedingDemo, setSeedingDemo] = useState(false);
   const [seedError, setSeedError] = useState("");
 
@@ -89,7 +88,6 @@ export function WorkspacePage() {
         body: JSON.stringify({
           workspace_id: id,
           name: newName,
-          collection_type: newType,
         }),
       }
     );
@@ -203,30 +201,26 @@ export function WorkspacePage() {
 
 
         {showCreate && (
-          <div className="mb-6 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <div className="mb-6 bg-white p-5 rounded-md border border-gray-200">
             {/* Quick templates */}
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
               Start from a template
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
               {[
-                { name: "Meeting Notes", type: "documents", icon: "📝" },
-                { name: "Decisions", type: "documents", icon: "✅" },
-                { name: "CRM Contacts", type: "structured", icon: "👥" },
-                { name: "Product Specs", type: "mixed", icon: "📋" },
+                { name: "Meeting Notes", icon: "📝" },
+                { name: "Decisions", icon: "✅" },
+                { name: "CRM Contacts", icon: "👥" },
+                { name: "Product Specs", icon: "📋" },
               ].map((tpl) => (
                 <button
                   key={tpl.name}
                   type="button"
-                  onClick={() => {
-                    setNewName(tpl.name);
-                    setNewType(tpl.type);
-                  }}
-                  className="text-left p-3 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all text-sm"
+                  onClick={() => setNewName(tpl.name)}
+                  className="text-left p-3 rounded-md border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all text-sm"
                 >
                   <span className="text-lg">{tpl.icon}</span>
                   <p className="font-medium text-gray-800 mt-1">{tpl.name}</p>
-                  <p className="text-xs text-gray-400">{tpl.type}</p>
                 </button>
               ))}
             </div>
@@ -245,26 +239,12 @@ export function WorkspacePage() {
                   onChange={(e) => setNewName(e.target.value)}
                   required
                   placeholder="Collection name"
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
                 />
-              </label>
-              <label>
-                <span className="text-sm font-medium text-gray-700">
-                  Type
-                </span>
-                <select
-                  value={newType}
-                  onChange={(e) => setNewType(e.target.value)}
-                  className="mt-1 block rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none"
-                >
-                  <option value="documents">Documents</option>
-                  <option value="structured">Structured</option>
-                  <option value="mixed">Mixed</option>
-                </select>
               </label>
               <button
                 type="submit"
-                className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800"
+                className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800"
               >
                 Create
               </button>
@@ -606,9 +586,11 @@ function CollectionCard({
         )}
       </div>
       <div className="flex items-center gap-2 mt-2">
-        <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded">
-          {isSynced ? "read-only" : col.collection_type}
-        </span>
+        {isSynced && (
+          <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded">
+            read-only
+          </span>
+        )}
         <span className="text-xs text-gray-400">
           {col.entry_count} {isSynced ? "rows" : "entries"}
         </span>

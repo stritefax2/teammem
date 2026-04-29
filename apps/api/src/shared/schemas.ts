@@ -57,7 +57,13 @@ export const sourceConfigSchema = z.object({
 export const createCollectionSchema = z
   .object({
     name: z.string().min(1).max(100),
-    collection_type: z.enum(["structured", "documents", "mixed"]),
+    // Kept for backward compat with old clients and existing rows; not
+    // surfaced in the UI anymore. Every entry can carry both structured
+    // fields and freeform content regardless of this value, so the type
+    // was decorative. Default to "mixed" if omitted.
+    collection_type: z
+      .enum(["structured", "documents", "mixed"])
+      .default("mixed"),
     schema: z.record(z.unknown()).optional(),
     source_id: z.string().uuid().optional(),
     source_config: sourceConfigSchema.optional(),

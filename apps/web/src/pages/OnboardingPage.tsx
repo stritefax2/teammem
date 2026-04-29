@@ -30,25 +30,21 @@ interface DataSource {
 const TEMPLATES = [
   {
     name: "Decisions",
-    type: "documents",
     icon: "✅",
     desc: "What your team decided and why. Agents write here.",
   },
   {
     name: "Meeting Notes",
-    type: "documents",
     icon: "📝",
     desc: "Standups, retros, 1:1s. Searchable by every agent.",
   },
   {
     name: "Agent Observations",
-    type: "documents",
     icon: "🧠",
     desc: "Where Claude/Cursor log insights about connected data.",
   },
   {
     name: "Specs & RFCs",
-    type: "mixed",
     icon: "📋",
     desc: "Product specs, engineering RFCs, design docs.",
   },
@@ -136,7 +132,6 @@ export function OnboardingPage() {
             body: JSON.stringify({
               workspace_id: workspace.id,
               name: tpl.name,
-              collection_type: tpl.type,
             }),
           }
         );

@@ -591,11 +591,8 @@ export function CollectionPage() {
                   Start adding data
                 </h3>
                 <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
-                  {collection.collection_type === "structured"
-                    ? "Add rows of structured data — like a spreadsheet your AI agents can query."
-                    : collection.collection_type === "documents"
-                      ? "Add documents, meeting notes, or decisions. Agents can search and reference them."
-                      : "Add structured fields, freeform content, or both."}
+                  Add entries — structured fields, freeform content, or
+                  both. Agents can read and write through scoped keys.
                 </p>
                 <button
                   onClick={() => setShowCreate(true)}
