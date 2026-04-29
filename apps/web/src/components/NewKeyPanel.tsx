@@ -18,11 +18,41 @@ export function NewKeyPanel({
 }) {
   const [tool, setTool] = useState<"claude" | "cursor" | "other">("claude");
   const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   function copy(text: string) {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  }
+
+  // Format a paste-friendly block for sharing the key with a teammate
+  // or external collaborator. Includes the MCP config + setup steps +
+  // an explicit "treat as password" line. We deliberately don't email
+  // this from the server — email is a bad channel for secrets. Owner
+  // copies, pastes into Slack DM / 1Password / Signal / wherever they
+  // share secrets in their own org.
+  function copyShareMessage() {
+    const message = `Here's a TeamMem agent key for our workspace.
+
+It gives an MCP-compatible AI tool (Claude Desktop, Cursor, etc.) scoped, audited access to the data we've connected. Treat it like a password — don't share in public channels.
+
+API key:
+${rawKey}
+
+Setup for Claude Desktop:
+1. Open Claude Desktop → Settings → Developer → Edit Config
+2. Paste this config and save:
+
+${config}
+
+3. Restart Claude Desktop. The "teammem" tool should now be available.
+
+If you need to revoke or change the key's scope, ping me and I'll do it from the workspace settings.`;
+
+    navigator.clipboard.writeText(message);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2500);
   }
 
   const config = `{
@@ -66,9 +96,18 @@ export function NewKeyPanel({
 
       {/* Raw key */}
       <div className="px-4 py-3">
-        <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1.5">
-          API key
-        </p>
+        <div className="flex items-center justify-between mb-1.5">
+          <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500">
+            API key
+          </p>
+          <button
+            onClick={copyShareMessage}
+            className="text-[10px] font-mono uppercase tracking-wider text-gray-700 bg-white border border-gray-200 hover:border-gray-300 px-2 py-0.5 rounded transition-colors"
+            title="Copy a paste-friendly block for sharing via Slack DM, 1Password, etc."
+          >
+            {shareCopied ? "✓ share message copied" : "copy share message"}
+          </button>
+        </div>
         <div className="flex items-center gap-2">
           <code className="flex-1 bg-gray-950 text-emerald-300 px-3 py-2 rounded-md text-sm font-mono select-all break-all">
             {rawKey}
@@ -80,6 +119,11 @@ export function NewKeyPanel({
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
+        <p className="mt-2 text-[11px] text-gray-500 leading-relaxed">
+          Sharing with a teammate or contractor? Paste the share-message
+          into a private channel (Slack DM, 1Password share, Signal).
+          Don't email it in plaintext or post in public channels.
+        </p>
       </div>
 
       {/* Tool tabs */}
