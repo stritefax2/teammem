@@ -18,12 +18,19 @@ export function NewKeyPanel({
 }) {
   const [tool, setTool] = useState<"claude" | "cursor" | "other">("claude");
   const [copied, setCopied] = useState(false);
+  const [innerCopied, setInnerCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
 
   function copy(text: string) {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  }
+
+  function copyInner(text: string) {
+    navigator.clipboard.writeText(text);
+    setInnerCopied(true);
+    setTimeout(() => setInnerCopied(false), 1500);
   }
 
   // Format a paste-friendly block for sharing the key with a teammate
@@ -55,6 +62,8 @@ If you need to revoke or change the key's scope, ping me and I'll do it from the
     setTimeout(() => setShareCopied(false), 2500);
   }
 
+  // The full file — paste this into claude_desktop_config.json when
+  // the file is empty (or contains just `{}`).
   const config = `{
   "mcpServers": {
     "prismian": {
@@ -72,6 +81,25 @@ If you need to revoke or change the key's scope, ping me and I'll do it from the
     }
   }
 }`;
+
+  // Just the inner entry — paste this *inside* an existing
+  // `mcpServers: { ... }` block when the user already has other MCP
+  // tools configured. The leading comma is included so users don't
+  // forget it when merging next to siblings.
+  const innerEntry = `,
+    "prismian": {
+      "command": "npx",
+      "args": ["-y", "prismian-mcp"],
+      "env": {
+        "PRISMIAN_API_KEY": "${rawKey}",
+        "PRISMIAN_WORKSPACE": "${workspaceId}"${
+          API_URL_FOR_AGENTS
+            ? `,
+        "PRISMIAN_API_URL": "${API_URL_FOR_AGENTS}"`
+            : ""
+        }
+      }
+    }`;
 
   return (
     <div className="bg-white rounded-xl ring-1 ring-emerald-200 overflow-hidden">
@@ -153,37 +181,75 @@ If you need to revoke or change the key's scope, ping me and I'll do it from the
         {/* Tab body */}
         <div className="px-4 py-4">
           {tool === "claude" && (
-            <ol className="text-xs text-gray-600 space-y-1.5 mb-3 leading-relaxed">
-              <li>
-                <span className="text-gray-400 font-mono mr-1.5">1.</span>
-                Open Claude Desktop →{" "}
-                <span className="font-medium text-gray-900">Settings</span> →{" "}
-                <span className="font-medium text-gray-900">Developer</span> →{" "}
-                <span className="font-medium text-gray-900">Edit Config</span>{" "}
-                (opens{" "}
-                <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
-                  claude_desktop_config.json
-                </code>
-                )
-              </li>
-              <li>
-                <span className="text-gray-400 font-mono mr-1.5">2.</span>
-                Paste the config below into that file and save. If the
-                file already has{" "}
-                <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
-                  mcpServers
-                </code>
-                , merge — don't overwrite your other tools.
-              </li>
-              <li>
-                <span className="text-gray-400 font-mono mr-1.5">3.</span>
-                Quit Claude Desktop completely (
-                <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
-                  ⌘Q
-                </code>{" "}
-                on Mac — closing the window isn't enough) and reopen
-              </li>
-            </ol>
+            <>
+              <ol className="text-xs text-gray-600 space-y-1.5 mb-3 leading-relaxed">
+                <li>
+                  <span className="text-gray-400 font-mono mr-1.5">1.</span>
+                  Open Claude Desktop →{" "}
+                  <span className="font-medium text-gray-900">Settings</span>{" "}
+                  →{" "}
+                  <span className="font-medium text-gray-900">
+                    Developer
+                  </span>{" "}
+                  →{" "}
+                  <span className="font-medium text-gray-900">
+                    Edit Config
+                  </span>
+                  . That opens{" "}
+                  <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
+                    claude_desktop_config.json
+                  </code>{" "}
+                  in your default text editor.
+                </li>
+                <li>
+                  <span className="text-gray-400 font-mono mr-1.5">2.</span>
+                  Look at the file. Pick the option below that matches
+                  what's in it, then copy + paste.
+                </li>
+                <li>
+                  <span className="text-gray-400 font-mono mr-1.5">3.</span>
+                  Save the file, then{" "}
+                  <span className="font-medium text-gray-900">
+                    fully quit
+                  </span>{" "}
+                  Claude Desktop (
+                  <code className="bg-gray-100 px-1 rounded text-gray-800 font-mono">
+                    ⌘Q
+                  </code>{" "}
+                  on Mac — closing the window isn't enough) and reopen.
+                </li>
+              </ol>
+
+              {/* Where the file lives — most non-devs don't know this */}
+              <details className="mb-4 bg-gray-50 border border-gray-200 rounded-md text-xs">
+                <summary className="cursor-pointer select-none px-3 py-2 text-gray-700 hover:text-gray-900 font-medium list-none flex items-center justify-between">
+                  <span>Where is the file on disk?</span>
+                  <span className="text-gray-400 group-open:rotate-180 transition-transform">
+                    ▾
+                  </span>
+                </summary>
+                <div className="px-3 pb-3 pt-1 space-y-1.5 text-gray-600 leading-relaxed">
+                  <p>
+                    <span className="font-medium text-gray-900">macOS:</span>{" "}
+                    <code className="bg-white border border-gray-200 px-1.5 py-0.5 rounded font-mono">
+                      ~/Library/Application Support/Claude/claude_desktop_config.json
+                    </code>
+                  </p>
+                  <p>
+                    <span className="font-medium text-gray-900">
+                      Windows:
+                    </span>{" "}
+                    <code className="bg-white border border-gray-200 px-1.5 py-0.5 rounded font-mono">
+                      %APPDATA%\Claude\claude_desktop_config.json
+                    </code>
+                  </p>
+                  <p className="text-gray-500">
+                    The "Edit Config" button opens this file directly —
+                    you usually don't need to find it manually.
+                  </p>
+                </div>
+              </details>
+            </>
           )}
           {tool === "cursor" && (
             <ol className="text-xs text-gray-600 space-y-1.5 mb-3 leading-relaxed">
@@ -216,11 +282,93 @@ If you need to revoke or change the key's scope, ping me and I'll do it from the
             </p>
           )}
 
-          {tool !== "other" ? (
+          {tool === "claude" ? (
+            <div className="space-y-3">
+              {/* Option A: empty / fresh file */}
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                    option a
+                  </span>
+                  <span className="text-xs text-gray-700">
+                    File is empty (or just{" "}
+                    <code className="bg-gray-100 px-1 rounded font-mono">{`{}`}</code>
+                    ) — paste this whole block and save.
+                  </span>
+                </div>
+                <div className="bg-gray-950 rounded-md ring-1 ring-gray-900 overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-800 bg-gray-900/60">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500">
+                      claude_desktop_config.json (full)
+                    </span>
+                    <button
+                      onClick={() => copy(config)}
+                      className="text-[10px] font-mono uppercase tracking-wider text-gray-400 hover:text-gray-200"
+                    >
+                      {copied ? "copied" : "copy whole file"}
+                    </button>
+                  </div>
+                  <pre className="text-[11px] text-gray-300 overflow-x-auto leading-relaxed p-3">
+                    {config}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Option B: merging into existing mcpServers */}
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-gray-600 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded">
+                    option b
+                  </span>
+                  <span className="text-xs text-gray-700">
+                    File already has{" "}
+                    <code className="bg-gray-100 px-1 rounded font-mono">
+                      mcpServers
+                    </code>{" "}
+                    with other tools — paste this entry inside, after
+                    your last existing tool's closing{" "}
+                    <code className="bg-gray-100 px-1 rounded font-mono">{`}`}</code>
+                    .
+                  </span>
+                </div>
+                <div className="bg-gray-950 rounded-md ring-1 ring-gray-900 overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-800 bg-gray-900/60">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500">
+                      just the prismian entry
+                    </span>
+                    <button
+                      onClick={() => copyInner(innerEntry)}
+                      className="text-[10px] font-mono uppercase tracking-wider text-gray-400 hover:text-gray-200"
+                    >
+                      {innerCopied ? "copied" : "copy entry only"}
+                    </button>
+                  </div>
+                  <pre className="text-[11px] text-gray-300 overflow-x-auto leading-relaxed p-3">
+                    {innerEntry}
+                  </pre>
+                </div>
+                <p className="mt-1.5 text-[11px] text-gray-500 leading-relaxed">
+                  The leading comma is included — paste it in right
+                  after your last existing tool entry. If your file has
+                  trailing whitespace or comments, a JSON validator
+                  (e.g.{" "}
+                  <a
+                    href="https://jsonlint.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-700 underline underline-offset-2 decoration-gray-300"
+                  >
+                    jsonlint.com
+                  </a>
+                  ) catches syntax errors before Claude does.
+                </p>
+              </div>
+            </div>
+          ) : tool === "cursor" ? (
             <div className="bg-gray-950 rounded-md ring-1 ring-gray-900 overflow-hidden">
               <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-800 bg-gray-900/60">
                 <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500">
-                  mcp.config.json
+                  .cursor/mcp.json
                 </span>
                 <button
                   onClick={() => copy(config)}
