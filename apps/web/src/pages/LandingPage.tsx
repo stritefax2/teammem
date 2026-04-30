@@ -1197,43 +1197,114 @@ export function LandingPage() {
               Because "give Claude your prod password" is not a security model.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 gap-6">
+          <div className="grid sm:grid-cols-2 gap-3">
             {[
               {
                 title: "Read-only by construction",
                 desc: "Agents cannot write to your source database. Ever. Connected collections reject all writes at the API layer — not just via permissions, but as a structural invariant.",
+                tag: "structural",
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+                  />
+                ),
               },
               {
                 title: "Per-agent column redaction",
                 desc: "Your sales agent sees customers.email but not customers.credit_card_last4. Your CI bot sees orders.status but not orders.total_revenue. Configured per key, enforced before data leaves the API.",
+                tag: "per-key",
+                icon: (
+                  <>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.243 4.243L9.88 9.88"
+                    />
+                  </>
+                ),
               },
               {
                 title: "Encrypted credentials",
                 desc: "Your DB connection string is AES-GCM encrypted at rest. Agents never see it. Team members never see it. Rotate or revoke any time without re-connecting tools.",
+                tag: "AES-256-GCM",
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
+                  />
+                ),
               },
               {
                 title: "Full audit trail",
                 desc: "Every read, every query, every agent — logged with row IDs and timestamps. Reviewable in the UI or via API. Compliance-ready from day one.",
+                tag: "every read",
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"
+                  />
+                ),
               },
               {
                 title: "Rate limiting per agent",
                 desc: "Cap queries per hour per key. Prevent a runaway agent from ETLing your whole customers table into a chat window.",
+                tag: "per-key cap",
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                ),
               },
               {
                 title: "Scoped, revocable keys",
                 desc: "Each AI tool gets its own key with its own scope. Revoke instantly when a contractor offboards or a laptop walks off — without rotating your actual DB password.",
+                tag: "instant revoke",
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 5.25a3 3 0 013 3m-7.5 11.25l-2.25-2.25m0 0l3.55-3.55a6 6 0 116.193-7.029M11.25 19.5L9 21.75M11.25 19.5l3-3m-3 3v-2.25"
+                  />
+                ),
               },
             ].map((item) => (
               <div
                 key={item.title}
-                className="bg-white rounded-2xl p-5 border border-gray-100"
+                className="bg-white rounded-md p-5 border border-gray-200 flex gap-4"
               >
-                <h3 className="font-semibold text-gray-900 text-sm">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">
-                  {item.desc}
-                </p>
+                <div className="shrink-0">
+                  <div className="w-9 h-9 rounded-md bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700">
+                    <svg
+                      className="w-4.5 h-4.5"
+                      style={{ width: 18, height: 18 }}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.75}
+                      viewBox="0 0 24 24"
+                    >
+                      {item.icon}
+                    </svg>
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h3 className="font-semibold text-gray-900 text-sm">
+                      {item.title}
+                    </h3>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-gray-500 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded">
+                      {item.tag}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -1289,114 +1360,141 @@ export function LandingPage() {
           </div>
 
           <div className="grid sm:grid-cols-3 gap-3 mb-8">
-            <div className="bg-white rounded-md border border-gray-200 p-4">
-              <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-2">
-                Encryption
-              </p>
-              <ul className="text-xs text-gray-700 space-y-1.5 leading-relaxed">
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 mt-0.5 shrink-0">✓</span>
-                  <span>
-                    Connection strings: AES-256-GCM at rest with a key only
-                    the API has
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 mt-0.5 shrink-0">✓</span>
-                  <span>
-                    All transport: TLS 1.2+ (Vercel, Supabase, your DB)
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-gray-400 mt-0.5 shrink-0">○</span>
-                  <span className="text-gray-600">
-                    Synced rows: Supabase disk encryption only (no extra
-                    app-level layer yet — on roadmap)
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-white rounded-md border border-gray-200 p-4">
-              <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-2">
-                Access
-              </p>
-              <ul className="text-xs text-gray-700 space-y-1.5 leading-relaxed">
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 mt-0.5 shrink-0">✓</span>
-                  <span>
-                    Workspace isolation enforced in middleware{" "}
-                    <em className="not-italic text-gray-500">and</em>{" "}
-                    Postgres RLS
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 mt-0.5 shrink-0">✓</span>
-                  <span>
-                    Per-agent column redaction enforced before data leaves
-                    the API
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-gray-400 mt-0.5 shrink-0">○</span>
-                  <span className="text-gray-600">
-                    Workspace = trust boundary. Members see all collections
-                    in their workspace; fine-grained scoping is on{" "}
-                    <em className="not-italic">agent keys</em>, not member
-                    roles. Built for internal teams — not customer-facing
-                    portals (yet).
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-gray-400 mt-0.5 shrink-0">○</span>
-                  <span className="text-gray-600">
-                    Founder retains DB-admin access (early stage). Not yet
-                    SOC 2 — happy to walk through controls 1:1.
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-white rounded-md border border-gray-200 p-4">
-              <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-2">
-                Retention
-              </p>
-              <ul className="text-xs text-gray-700 space-y-1.5 leading-relaxed">
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 mt-0.5 shrink-0">✓</span>
-                  <span>
-                    Delete a workspace → every entry, audit row, and key
-                    cascades within seconds
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 mt-0.5 shrink-0">✓</span>
-                  <span>
-                    Delete a collection → its synced rows go with it
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 mt-0.5 shrink-0">✓</span>
-                  <span>
-                    Disconnect a source → cascades to every collection that
-                    reads from it
-                  </span>
-                </li>
-              </ul>
-            </div>
+            {[
+              {
+                label: "Encryption",
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+                  />
+                ),
+                items: [
+                  { ok: true, text: "Connection strings: AES-256-GCM at rest" },
+                  { ok: true, text: "All transport: TLS 1.2+" },
+                  {
+                    ok: false,
+                    text: "Row data: Supabase disk encryption only — app-level layer on roadmap",
+                  },
+                ],
+              },
+              {
+                label: "Access",
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+                  />
+                ),
+                items: [
+                  { ok: true, text: "Workspace isolation: middleware + Postgres RLS" },
+                  { ok: true, text: "Per-agent column redaction before data leaves the API" },
+                  {
+                    ok: false,
+                    text: "Workspace = trust boundary; member-level scoping not enforced. Internal teams, not customer portals.",
+                  },
+                  {
+                    ok: false,
+                    text: "Founder retains DB-admin access. Not SOC 2 yet.",
+                  },
+                ],
+              },
+              {
+                label: "Retention",
+                icon: (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                  />
+                ),
+                items: [
+                  { ok: true, text: "Delete workspace → every entry, key, audit row cascades" },
+                  { ok: true, text: "Delete a collection → its synced rows go with it" },
+                  { ok: true, text: "Disconnect a source → cascades to every reader collection" },
+                ],
+              },
+            ].map((col) => (
+              <div
+                key={col.label}
+                className="bg-white rounded-md border border-gray-200 p-4"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 rounded-md bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700">
+                    <svg
+                      style={{ width: 14, height: 14 }}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.75}
+                      viewBox="0 0 24 24"
+                    >
+                      {col.icon}
+                    </svg>
+                  </div>
+                  <p className="text-[10px] font-mono uppercase tracking-wider text-gray-500">
+                    {col.label}
+                  </p>
+                </div>
+                <ul className="text-xs text-gray-700 space-y-2 leading-relaxed">
+                  {col.items.map((it, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      {it.ok ? (
+                        <span className="mt-0.5 shrink-0 w-3.5 h-3.5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                          <svg
+                            className="w-2 h-2 text-emerald-700"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </span>
+                      ) : (
+                        <span className="mt-0.5 shrink-0 w-3.5 h-3.5 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center">
+                          <span className="w-1 h-1 rounded-full bg-amber-500" />
+                        </span>
+                      )}
+                      <span className={it.ok ? "" : "text-gray-600"}>
+                        {it.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
 
-          <div className="bg-gray-50 border border-gray-200 rounded-md p-4 text-sm text-gray-700 leading-relaxed">
-            <p>
+          <div className="bg-gray-50 border border-gray-200 rounded-md p-4 flex items-start gap-3">
+            <span className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+              <svg
+                className="w-3 h-3 text-emerald-700"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"
+                />
+              </svg>
+            </span>
+            <p className="text-sm text-gray-700 leading-relaxed">
               <span className="font-medium text-gray-900">
-                For your first connection, point us at non-production data
+                Start with non-production data.
               </span>{" "}
-              — a staging DB, a read replica, or a workspace clone. Not
-              because we'd misuse prod, but because nobody trusts a beta
-              with real customers on day one and you shouldn't either.
-              When you're ready to graduate to prod data, we'll have done
-              the encryption-at-rest work and a SOC&nbsp;2 audit's worth
-              of paper.
+              A staging DB, read replica, or workspace clone. Not because
+              we'd misuse prod — because nobody trusts a beta with real
+              customers on day one. By the time you graduate to prod, we'll
+              have shipped app-level encryption and SOC 2 paper.
             </p>
           </div>
         </div>
