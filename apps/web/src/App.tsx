@@ -12,6 +12,7 @@ import { CollectionPage } from "./pages/CollectionPage.js";
 import { EntryPage } from "./pages/EntryPage.js";
 import { SettingsPage } from "./pages/SettingsPage.js";
 import { AcceptInvitePage } from "./pages/AcceptInvitePage.js";
+import { DocsToolsPage } from "./pages/DocsToolsPage.js";
 import type { ReactNode } from "react";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -37,6 +38,10 @@ export function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        {/* Docs are public — engineers and security teams want to read
+            them before signing up. */}
+        <Route path="/docs" element={<DocsToolsPage />} />
+        <Route path="/docs/tools" element={<DocsToolsPage />} />
         <Route
           path="/login"
           element={

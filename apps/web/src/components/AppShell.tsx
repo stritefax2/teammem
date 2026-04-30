@@ -206,15 +206,13 @@ export function AppShell({
                 Workspace
               </Link>
             )}
-            <a
-              href="https://github.com/stritefax2/prismian#readme"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/docs"
               className="text-sm text-gray-500 hover:text-gray-700 hidden sm:inline"
-              title="Docs & code examples on GitHub"
+              title="MCP tool reference + examples"
             >
-              Help
-            </a>
+              Docs
+            </Link>
             <span className="text-xs text-gray-400 hidden sm:block">
               {user?.email}
             </span>

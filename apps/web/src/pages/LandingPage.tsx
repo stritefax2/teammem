@@ -1500,73 +1500,42 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Agent capabilities ─── */}
-      <section className="py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900">
-              What your agents get
-            </h2>
-            <p className="mt-3 text-gray-500 max-w-lg mx-auto">
-              Six read tools, wired automatically. Works with any
-              MCP-compatible AI tool.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* ─── Agent capabilities (compact) ─── */}
+      <section className="py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">
+            What your agents actually get
+          </h2>
+          <p className="mt-3 text-gray-500 leading-relaxed">
+            Six read tools and two write tools wired automatically.
+            Schema-aware, scope-enforced, audited. Works with any
+            MCP-compatible AI tool — no SDK to integrate.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
             {[
-              {
-                tool: "list_collections",
-                desc: "Discover what tables and column schemas are exposed",
-                example: "Called first in every conversation",
-              },
-              {
-                tool: "query_structured",
-                desc: "Filter and sort rows by exact field values",
-                example: "customers where mrr > 1000 and status = 'active'",
-              },
-              {
-                tool: "aggregate",
-                desc: "Count, sum, avg, group_by — safe analytics, not raw SQL",
-                example: "Total MRR by plan, top 5 customers by deal size",
-              },
-              {
-                tool: "search",
-                desc: "Semantic + full-text search over prose columns",
-                example: "\"customers mentioning pricing pushback\"",
-              },
-              {
-                tool: "read_entry",
-                desc: "Read one full row by ID",
-                example: "Fetch Acme's full customer record",
-              },
-              {
-                tool: "workspace_info",
-                desc: "One-shot overview: name, collections, sync freshness, schemas",
-                example: "Orient at the start of a session",
-              },
-            ].map((item) => (
-              <div
-                key={item.tool}
-                className="bg-white rounded-xl p-5 border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all"
+              "list_collections",
+              "query_structured",
+              "aggregate",
+              "search",
+              "read_entry",
+              "workspace_info",
+              "write_entry",
+              "update_entry",
+            ].map((t) => (
+              <code
+                key={t}
+                className="text-[11px] font-mono bg-gray-100 border border-gray-200 text-gray-700 px-2 py-0.5 rounded"
               >
-                <code className="text-xs font-mono text-gray-900 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded font-medium">
-                  {item.tool}
-                </code>
-                <p className="text-sm font-medium text-gray-900 mt-2.5">
-                  {item.desc}
-                </p>
-                <p className="text-xs text-gray-400 mt-1.5 italic">
-                  {item.example}
-                </p>
-              </div>
+                {t}
+              </code>
             ))}
           </div>
-          <p className="mt-8 text-center text-xs text-gray-400 max-w-xl mx-auto">
-            Plus <code className="bg-gray-100 text-gray-600 px-1 rounded">write_entry</code> and{" "}
-            <code className="bg-gray-100 text-gray-600 px-1 rounded">update_entry</code>{" "}
-            for agents that need to persist observations back to scoped
-            writable collections. Never writes to your source DB.
-          </p>
+          <Link
+            to="/docs/tools"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-gray-900 hover:underline underline-offset-4 decoration-emerald-500 decoration-2"
+          >
+            Read the full tool reference →
+          </Link>
         </div>
       </section>
 
