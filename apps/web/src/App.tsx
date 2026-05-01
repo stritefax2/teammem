@@ -14,6 +14,7 @@ import { SettingsPage } from "./pages/SettingsPage.js";
 import { AcceptInvitePage } from "./pages/AcceptInvitePage.js";
 import { DocsToolsPage } from "./pages/DocsToolsPage.js";
 import { SecurityPage } from "./pages/SecurityPage.js";
+import { AdminActivityPage } from "./pages/AdminActivityPage.js";
 import type { ReactNode } from "react";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -125,6 +126,16 @@ export function App() {
           element={
             <ProtectedRoute>
               <AcceptInvitePage />
+            </ProtectedRoute>
+          }
+        />
+        {/* Operator-only activity feed. The API enforces the ADMIN_EMAILS
+            allowlist; this route just gates on having a session at all. */}
+        <Route
+          path="/admin/activity"
+          element={
+            <ProtectedRoute>
+              <AdminActivityPage />
             </ProtectedRoute>
           }
         />

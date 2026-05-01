@@ -61,6 +61,7 @@ Skip this step if you're deploying to Railway / Fly / Render / a VPS — the in-
    - `CRON_SECRET` = output of `openssl rand -hex 32`
    - `ALLOWED_ORIGINS` = comma-separated list of web-app origins (e.g. `https://app.prismian.dev`). **Required in production** — browser requests from any other origin will be rejected.
    - `WEB_URL` = your public web app URL (e.g. `https://app.prismian.dev`). **Required in production** — used as the redirect target in invite emails. If missing, invite links point at localhost.
+   - `ADMIN_EMAILS` = comma-separated list of operator emails allowed to view the activity feed at `/admin/activity`. Captures milestones (signup, source connected, first agent key, first agent read) into the `activity_events` table for design-partner-phase visibility.
 5. Deploy.
 6. **Add a Vercel Cron job** to drive syncs. In the root of `apps/api`, create `vercel.json`:
 

@@ -1,6 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import { query } from "../db/client.js";
 import { supabaseAdmin } from "../lib/supabase.js";
+import { notify } from "../services/notify.js";
 import crypto from "node:crypto";
 
 export interface AuthContext {
@@ -60,13 +61,24 @@ export const authMiddleware = createMiddleware<{
     return c.json({ error: "Invalid token" }, 401);
   }
 
-  // Ensure user exists in our users table (upsert on first API call)
-  await query(
+  // Ensure user exists in our users table (upsert on first API call).
+  // `xmax = 0` is the canonical Postgres trick for "this row was an INSERT,
+  // not an UPDATE-on-conflict" — we use it to fire the signup notification
+  // exactly once, on the user's first authenticated API call.
+  const upsertResult = await query<{ inserted: boolean }>(
     `INSERT INTO users (id, email, name)
      VALUES ($1, $2, $3)
-     ON CONFLICT (id) DO UPDATE SET email = $2, name = COALESCE($3, users.name)`,
+     ON CONFLICT (id) DO UPDATE SET email = $2, name = COALESCE($3, users.name)
+     RETURNING (xmax = 0) AS inserted`,
     [user.id, user.email, user.user_metadata?.name || null]
   );
+  if (upsertResult.rows[0]?.inserted) {
+    await notify({
+      kind: "register",
+      email: user.email || "(no email)",
+      name: user.user_metadata?.name || null,
+    });
+  }
 
   c.set("auth", { userId: user.id });
   await next();

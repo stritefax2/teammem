@@ -15,6 +15,7 @@ import {
 } from "../services/connectors/postgres.js";
 import { runSyncNow } from "../services/connectors/sync.js";
 import { logAction } from "../services/audit.js";
+import { notify } from "../services/notify.js";
 
 // Map common Postgres connection failures to a plain-English hint so the
 // modal can show "wrong password" instead of just "password authentication
@@ -149,6 +150,24 @@ dataSourceRoutes.post("/", async (c) => {
 
   logAction(auth, workspaceId, "create", "data_source", result.rows[0].id, {
     source_type: parsed.data.source_type,
+  });
+
+  // Fire-and-await notify so Vercel doesn't kill the function before the
+  // webhook lands. Looks up workspace name + user email in one round-trip.
+  const ctx = await query<{ workspace_name: string; user_email: string | null }>(
+    `SELECT w.name AS workspace_name, u.email AS user_email
+     FROM workspaces w
+     LEFT JOIN users u ON u.id = $2
+     WHERE w.id = $1`,
+    [workspaceId, auth.userId]
+  );
+  await notify({
+    kind: "connect_source",
+    userEmail: ctx.rows[0]?.user_email || "(unknown)",
+    workspaceId,
+    workspaceName: ctx.rows[0]?.workspace_name || "(unknown)",
+    sourceType: parsed.data.source_type,
+    sourceName: parsed.data.name,
   });
 
   return c.json({ data_source: result.rows[0] }, 201);

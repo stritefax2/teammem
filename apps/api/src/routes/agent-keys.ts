@@ -7,6 +7,7 @@ import {
   updateAgentKeySchema,
 } from "../shared/index.js";
 import type { AppEnv } from "../types.js";
+import { notify } from "../services/notify.js";
 
 export const agentKeyRoutes = new Hono<AppEnv>();
 
@@ -55,6 +56,14 @@ agentKeyRoutes.post("/", async (c) => {
   const keyHash = hashApiKey(rawKey);
   const lastFour = rawKey.slice(-4);
 
+  // Check whether this is the first key in the workspace BEFORE we insert,
+  // so the notify event fires exactly once (on the first key).
+  const existing = await query<{ count: string }>(
+    `SELECT count(*)::text AS count FROM agent_keys WHERE workspace_id = $1`,
+    [workspaceId]
+  );
+  const isFirstKey = existing.rows[0]?.count === "0";
+
   const result = await query(
     `INSERT INTO agent_keys
        (workspace_id, created_by, name, key_hash, permissions, last_four)
@@ -70,6 +79,23 @@ agentKeyRoutes.post("/", async (c) => {
       lastFour,
     ]
   );
+
+  if (isFirstKey) {
+    const ctx = await query<{ workspace_name: string; user_email: string | null }>(
+      `SELECT w.name AS workspace_name, u.email AS user_email
+       FROM workspaces w
+       LEFT JOIN users u ON u.id = $2
+       WHERE w.id = $1`,
+      [workspaceId, auth.userId]
+    );
+    await notify({
+      kind: "generate_first_key",
+      userEmail: ctx.rows[0]?.user_email || "(unknown)",
+      workspaceId,
+      workspaceName: ctx.rows[0]?.workspace_name || "(unknown)",
+      keyName: parsed.data.name,
+    });
+  }
 
   return c.json(
     {
